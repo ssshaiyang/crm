@@ -63,6 +63,7 @@ export default class Apply extends React.Component {
 		this.getMeetings()
 	}
     over() {
+    	console.log("over")
         let pagination = {
             page: 1,
             limit: 5,
@@ -93,6 +94,7 @@ export default class Apply extends React.Component {
 
 	//获取物料申请列表
 	getMeetings(params = {}) {
+		console.log("getMeetings")
 		function cb(res) {
 			if (res.error_code === GLOBALSUCCESS) {
 				const pagination = this.state.pagination;
@@ -216,6 +218,7 @@ export default class Apply extends React.Component {
 					submit: pushMeeting,
 					getList: this.getMeetings.bind(this),
 					getDetail: this.getDetail.bind(this),
+					over:this.over.bind(this)
 					
 				}
 			}

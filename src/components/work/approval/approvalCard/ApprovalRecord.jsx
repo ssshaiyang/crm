@@ -32,14 +32,19 @@ export class ApprovalRecord extends React.Component {
 
 	renderStepRecords(steps) {
 		return steps.map((step, i) => {
-			if (step.approval_record_status < 2)
-				return false;
+			var  checknum = 0;
+            if(!isNaN(step.approval_record_status)){
+                checknum =step.approval_record_status;
+            }
+			if (checknum < 2){
+                    return false;
+			}
 			return (
 				<p key={i} style={styles.records}>
 					<span style={styles.recordsSpan}>{formatDate(step.approval_create_time)}</span>
-					<span style={styles.recordsSpan}><Name uid={step.applicant_uid}>{step.applicant}</Name></span>
+					<span style={styles.recordsSpan}>{steps[i].employee_name}</span>
 					<span style={styles.recordsSpan}>{['同意','拒绝'][step.approval_record_status-2]}</span>
-					<span style={Object.assign({},styles.recordsSpan,{flex:3})}>{['备注：','拒绝原因：'][step.approval_record_status-2]+step.approval_record_remark}</span>
+                    <span style={Object.assign({},styles.recordsSpan,{flex:3})}>{['备注：','备注：','备注：','拒绝原因：','备注：'][checknum]+step.approval_record_remark}</span>
 				</p>
 			)
 		})

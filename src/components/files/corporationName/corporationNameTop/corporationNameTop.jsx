@@ -73,6 +73,18 @@ export class CorporationNameTop extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps){
+
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverNameList(params)
+                console.log("自动刷新")
+        }
+    }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
         let params = {
@@ -111,11 +123,12 @@ export class CorporationNameTop extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record ,index) {
         console.log('sssssss',record)
         this.setState({
             name: record.deliver_name,
-            id: record.deliver_id
+            id: record.deliver_id,
+            rowclicked:index
         })
     }
 
@@ -149,13 +162,16 @@ export class CorporationNameTop extends React.Component {
     handleSubmit(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
+
             if (!err) {
                 let params = {
                     deliver_id: this.state.id,
                     different_deliver_name: values.different_deliver_name,
                     creator_name: this.props.userInfo.username,
-                    different_deliver_remark: values.different_deliver_remark
+                    different_deliver_remark: values.different_deliver_remark,
+                    create_time:Date.parse(new Date())/1000
                 }
+                console.log(params)
                 this.props.addDeliverNameInfo(params);
             }
         });
@@ -199,9 +215,9 @@ export class CorporationNameTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -327,7 +343,8 @@ export class CorporationNameTop extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowKey={record => record.keyId} columns={columns} dataSource={this.props.rowData ? this.props.rowData : []} onRowClick={this.rowClick.bind(this)} />;
+                    <Table rowKey={record => record.keyId} columns={columns} dataSource={this.props.rowData ? this.props.rowData : []} onRowClick={this.rowClick.bind(this)}  rowKey
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />;
                 </Modal>
             </div>
         )
@@ -340,6 +357,8 @@ function mapStateToProps(state) {
         rowData: state.corporationInfo.data,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        addCode:state.corporationNameInfo.addDeliverNameCode,
+
     }
 }
 

@@ -10,7 +10,8 @@ import {
 	getHospitalOptions,
 	getHospitalDepartmentOptions,
 	getHospitalAddress,
-	getCustomerDetail
+	getCustomerDetail,
+    getHospitalAddresOptions
 } from '../../../../../utils/interface.js'
 
 /**
@@ -149,6 +150,23 @@ export const getHospitalAddressActionCreater = function(hospital_id) {
 			hospital_id: hospital_id
 		}, cb)
 	}
+}
+
+export const getHospitalAdressOptionsActionCreater = function() {
+    return (dispatch) => {
+        function cb(res) {
+            if (res.error_code === GLOBALSUCCESS) {
+                let action = {
+                    type: 'ADD_CUSTOMER_MODAL_GET_ADRESS_OPTIONS',
+                    payload: {
+                        value: res.data
+                    }
+                }
+                dispatch(action)
+            }
+        }
+        getHospitalAddresOptions(null, cb)
+    }
 }
 
 /**

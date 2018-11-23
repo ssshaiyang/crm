@@ -329,7 +329,7 @@ export const searchBusinessComInfoLists = function (params, cb) {
 }
 
 //获取代理商信息
-export const getAgentInfoList = function (params, cb) {
+export const getAgentListsinfo = function (params, cb) {
     // cb({
     //     "error_code": 1000,
     //     "data": true

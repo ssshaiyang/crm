@@ -16,20 +16,19 @@ let styles={
 
 export class RenderCard extends React.Component {
     componentWillMount(){
-
     }
 
     dataSort(obj){
-        console.log("obj",obj)
         let arr=[]
-      for(let i in obj.steps){
-         arr.push(obj.steps[i])
+        var jsonObj =  JSON.parse(obj.employee_steps_name)
+      for(let i in jsonObj ){
+         arr.push(jsonObj [i])
       }
       return arr.map((val, i)=> {
-
           if(i==0){
-              return  <Step key={i} title={<Popover content={val}><span style={styles.containers}>{val}</span></Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
-
+              // console.log(1)
+              // return  <Step key={i} title={<Popover content={val}><span style={styles.containers}>{val}</span></Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
+              return  <Step key={i} title={val} icon={<Icon type="user" style={{display: "none"}}/>}/>
           }else{
               return  <Step key={i} title={val} icon={<Icon type="user" style={{display: "none"}}/>}/>
 

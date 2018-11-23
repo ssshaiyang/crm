@@ -8,7 +8,6 @@ export const getSelectList = function () {
                     type: "GET_SELECT_DEPART_LIST",
                     payload: {
                         visible: res.data,
-                        code: res.error_code
                     }
                 }
                 dispatch(action);
@@ -18,9 +17,21 @@ export const getSelectList = function () {
     }
 }
 
+export const checkCode = function () {
+    return (dispatch) => {
+        let action = {
+            type: "CHECK_CODE",
+            payload: {
+                code: 0,
+            }
+        }
+        dispatch(action);
+    }
+}
 export const addDepartInfo = function (param = {}) {
     return (dispatch) => {
         function cb(res) {
+            console.log(res)
             if (res.error_code === GLOBALSUCCESS) {
                 let action = {
                     type: "ADD_DEPART_INFO_MODEL",

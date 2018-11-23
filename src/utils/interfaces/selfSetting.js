@@ -1,8 +1,8 @@
 /*
  * @Author: lcj
  * @Date:   2017-08-14 08:56:01
- * @Last Modified by:   lcj
- * @Last Modified time: 2017-08-17 13:08:59
+ * @Last Modified by:   Administrator
+ * @Last Modified time: 2018-07-13 11:58:04
  */
 
 'use strict';
@@ -64,5 +64,8 @@ export const uploadAvatar = function(params, cb) {
 	// 		"error_code": 1000,
 	// 		"data": true
 	// 	})
-	uploadFile('/users/avatar', 'head_picture', params, cb)
+	console.log(params)
+	console.log(cb)
+	post('/users/avatar',params, cb)
+	// uploadFile('/uploads', 'file', params, cb)
 }

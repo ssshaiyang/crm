@@ -45,18 +45,17 @@ export class SubmitModal extends React.Component{
 			content: '确定要提交吗',
 			onOk: () => {
 				
-				this.props.submit(sale_support_id)
+				this.props.submit(sale_support_id,cb.bind(this))
 			}
 		})
 		console.log(sale_support_id)
+		let that = this;
 		function cb(res) {
 			if (res.error_code === GLOBALSUCCESS) {
-				this.props.initPagination();
-				this.props.refreshList({
-					page: 1,
-					limit: 5
-				});
+				console.log("push success")
 				message.success("提交成功!")
+				that.props.over();
+				
 			}
 		}
 		
@@ -70,9 +69,9 @@ export class SubmitModal extends React.Component{
 		const button = this.props.data.material_apply_status == 0 ?
 					(<div><Button icon="edit" className="gridButton" onClick={this.edit.bind(this,material_apply_id)}/>
 					<Button icon="to-top" className="gridButton"  onClick={this.push.bind(this,material_apply_id)}/></div> )
-		: (<Button icon="select" className="gridButton" >
-			<Link to={'/work/approval'}></Link>
-			</Button>)
+		: (	
+				<Link to='/work/approval'><Button icon="select" className="gridButton" /></Link>)
+			
 		return (
 			<div>
 			{button}

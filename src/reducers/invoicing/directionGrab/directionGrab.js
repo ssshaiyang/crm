@@ -7,7 +7,8 @@ export default function redeceName(state, action) {
             newState.checkBoxVisible = action.payload.checkBoxVisible;
             newState.monthVisible = action.payload.monthVisible;
             break;
-
+        case 'INVENTORY_FORM_DATA_INIT':
+            newState.data =action.payload.checkBoxVisible
     }
     return newState;
 }

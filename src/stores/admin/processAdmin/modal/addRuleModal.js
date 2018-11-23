@@ -11,5 +11,6 @@ export default {
     detailData:[],
     changeData:[],
     changeFormData:[],
-    idList:[]
+    idList:[],
+    code:0
 }

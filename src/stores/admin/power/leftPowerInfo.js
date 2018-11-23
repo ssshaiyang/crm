@@ -12,4 +12,6 @@ export default {
     roleApply:[],
     roleCheckId:'',
     code:0,
+    changeCode:0,
+    updateCode:0,
 }

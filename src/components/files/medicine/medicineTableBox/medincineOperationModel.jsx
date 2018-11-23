@@ -62,14 +62,17 @@ const columns_agent = [{
     key: 'agent_name',
 }];
 
+
+const dateFormat = 'YYYY-MM-DD'
+
 function onChange(e) {
     //console.log(`checked = ${e.target.checked}`);
 }
 
 export class MedincineOperationModel extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             addMedicineVisible: false,
             agentModelVisible: false,
@@ -77,12 +80,46 @@ export class MedincineOperationModel extends React.Component {
             delAgentVisible: false,
             showManufacturerVisible: false,
             showBusinessComVisible: false,
-            showAgentVisible: false
+            showAgentVisible: false,
+            name:this.props.data.manufacturer_name,
+            id:this.props.data.manufacturer_id,
+            getBusinessSelectedRowsInitValue:'',
+            bussinessId:[],
+            billingId:[],
+            agentId:[]
+
+
         }
     }
 
     componentWillMount() {
-        console.log(this.props.data)
+        this.getBusinessSelectedRowsInitValue();
+        this.getAgentSelectedRowsInitValue();
+        this.getBillingSelectedRowsInitValue()
+        
+    }
+    componentDidMount(){
+        // var  time = moment("12-25-1995", "MM-DD-YYYY").toDate()
+        // // console.log(time)
+        // console.log(moment(this.props.data.business_license_expire_time))
+        
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugList(params);
+        }
+        if (nextProps.editcode == 1000 && this.props.editcode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugList(params);
+        }
     }
 
     /**
@@ -93,12 +130,13 @@ export class MedincineOperationModel extends React.Component {
         this.setState({
             addMedicineVisible: true
         })
+        console.log("editMedicine")
     }
 
     handleOkAddMechInfo() {
         const data = {
             page: -1,
-            limit: 10
+            limit: 5
         }
         this.props.getDrugList(data);
         this.setState({
@@ -173,11 +211,12 @@ export class MedincineOperationModel extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record,index) {
         //console.log('sssssss',record)
         this.setState({
             name: record.manufacturer_name,
             id: record.manufacturer_id,
+            rowclicked :index
         })
     }
 
@@ -185,18 +224,17 @@ export class MedincineOperationModel extends React.Component {
      * 展现开票公司弹框
      */
     showCompany() {
-        const param = {
+        const data = {
             page: -1,
             limit: 10
         }
-        this.props.getBillingComponyList(param);
+        this.props.getBillingComponyList(data);
         this.setState({
             showCompanyVisible: true
         })
     }
 
     handleOkCompanyInfo() {
-        //this.renderTag();
         this.setState({
             showCompanyVisible: false
         })
@@ -208,7 +246,7 @@ export class MedincineOperationModel extends React.Component {
         })
     }
 
-    //展示商业公司弹框方法组
+     //展示商业公司弹框方法组
     showBusinessCompany() {
         const param = {
             page: -1,
@@ -266,7 +304,7 @@ export class MedincineOperationModel extends React.Component {
     handleOkDelAgent() {
         const data = {
             page: -1,
-            limit: 10
+            limit: 5
         }
         if (this.props.delDrugInfoCode == 1000) {
             message.info('删除药品信息成功!');
@@ -292,7 +330,10 @@ export class MedincineOperationModel extends React.Component {
     handleSubmit(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            console.log('sssss', values);
+            console.log(this.state.billingId);
+            console.log(this.state.bussinessId);
+            console.log(this.state.agentId);
+            var companyuserid = sessionStorage.getItem('companyuserid');
             if (!err) {
                 let value = {
                     'drug_name': values.drug_name,
@@ -312,7 +353,6 @@ export class MedincineOperationModel extends React.Component {
                     'if_disabled': values.if_disabled,
                     'if_distribution': values.if_distribution,
                     'invoice_price': values.invoice_price,
-                    'other_price': values.other_price,
                     'production_expire_time': Date.parse(values['production_expire_time'].format('YYYY-MM-DD')) / 1000,
                     'production_license': values.production_license,
                     'protocol_region': values.protocol_region,
@@ -320,22 +360,32 @@ export class MedincineOperationModel extends React.Component {
                     'proxy': values.proxy,
                     'proxy_expire_time': Date.parse(values['proxy_expire_time'].format('YYYY-MM-DD')) / 1000,
                     'retail_price': values.retail_price,
+                    'bid_price':values.bid_price,
+                    'other_price':values.other_price,
                     'specification': values.specification,
                     'tax_price': values.tax_price,
                     'unit': values.unit,
-                    'manufacturer_id': values.manufacturer_id,
-                    'drug_billing': this.state.selectedkeys,
-                    'drug_deliver': this.state.selectedBusinessInfokeys,
-                    'drug_agent': ['1'],
+                    'creator_id':parseInt(companyuserid),
+                    'drug_remark':values.drug_remark,
+                    'drug_deliver':this.state.bussinessId,
+                    'drug_billing':this.state.billingId,
+                    'drug_agent':this.state.agentId
                 };
-                // let data = {
-                //     drug_id: this.props.data.drug_id,
-                //     values: value
-                // }
-                // this.props.editDrugInfo(data)
+                console.log(value)
+                let data = {
+                    drug_id: this.props.data.drug_id,
+                    values: value
+                }
+                this.props.editDrugInfo(data);
+
             }
+            const param = {
+                page: -1,
+                limit: 5
+            }
+            this.props.getDrugList(param);
         });
-    }
+}
 
     //获取选中的表格值
     getSelectedRowsValue() {
@@ -353,6 +403,20 @@ export class MedincineOperationModel extends React.Component {
         })
     }
 
+    getBusinessSelectedRowsInitValue(){
+        var bussinessName = '';
+        var bussinessId = [];
+        var drug_delivers = this.props.data.drug_delivers
+        drug_delivers.map(function(item){
+            bussinessName = bussinessName + '/'+ item.deliver_name + '  ';
+            bussinessId.push(item.deliver_id)
+        })
+        this.setState({
+            selectedBusinessInfoRows: bussinessName, 
+            bussinessId:bussinessId
+        })
+    }
+
     getBusinessSelectedRowsValue() {
         let selectedBusinessInfoValues = [];
         let selectedBusinessInfokeys = [];
@@ -365,6 +429,20 @@ export class MedincineOperationModel extends React.Component {
         this.setState({
             selectedBusinessInfoValues: selectedBusinessInfoValues,
             selectedBusinessInfokeys: selectedBusinessInfokeys
+        })
+    }
+
+    getAgentSelectedRowsInitValue(){
+        var agentName = '';
+        var agentId = [];
+        var drug_agents = this.props.data.drug_agents
+        drug_agents.map(function(item){
+            agentName = agentName + '/'+ item.agent_name + '  ';
+            agentId.push(item.agent_id)
+        })
+        this.setState({
+            selectedAgentRows: agentName, 
+            agentId:agentId
         })
     }
 
@@ -384,6 +462,21 @@ export class MedincineOperationModel extends React.Component {
         })
     }
 
+    getBillingSelectedRowsInitValue(){
+        var billingName = '';
+        var billingId = [];
+        var drug_billings = this.props.data.drug_billings;
+        drug_billings.map(function(item){
+            billingName = billingName + '/'+ item.billing_name + '  ';
+            billingId.push(item.billing_id)
+        })
+
+        this.setState({
+            selectedBillingInfoRows: billingName, 
+            billingId:billingId
+        })
+    }
+
     //是否分销单选按钮
     distribution(e) {
         distributionValue: e.target.value
@@ -395,22 +488,31 @@ export class MedincineOperationModel extends React.Component {
     }
 
     //代理商弹框
-    showAgentModal() {
+    showAgent() {
+        const data = {
+            page: -1,
+            limit: 10
+        }
+        this.props.getAgentList(data);
         this.setState({
             showAgentVisible: true
         })
     }
 
-    handleOkAgentModal() {
+    handleOkAgentInfo() {
         this.setState({
             showAgentVisible: false
         })
     }
 
-    handleCancelAgentModal() {
+    handleCancelAgentNameInfo() {
         this.setState({
             showAgentVisible: false
         })
+    }
+
+    getAgentInfoSearchValue(){
+
     }
 
 
@@ -448,6 +550,10 @@ export class MedincineOperationModel extends React.Component {
             }
         }
 
+        const manufacturerRowSelection ={
+             type: 'radio'
+        }
+
         const rowSelection = {
             onChange: (selectedRowKeys, selectedRows) => {
                 this.setState({
@@ -458,22 +564,60 @@ export class MedincineOperationModel extends React.Component {
             },
         }
 
+        const billing_rowSelection = {
+            onChange: (selectedRowKeys, selectedRows) => {
+
+                var billingName = '';
+                var billingId = [];
+                selectedRows.map(function(item) {
+                    console.log(item)
+                    billingName = billingName + '/' + item.billing_name + '  ';
+                    billingId.push(item.billing_id)
+                })
+                console.log(billingName)
+                this.setState({
+                    selectedBillingInfoRows: billingName,
+                    billingId:billingId
+                }, () => {
+                    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                })
+            },
+        }
+
         const business_rowSelection = {
             onChange: (selectedRowKeys, selectedRows) => {
+                var bussinessName = '';
+                var bussinessId = [];
+                selectedRows.map(function(item){
+                    console.log(item)
+                    bussinessName = bussinessName + '/'+ item.deliver_name + '  ';
+                    bussinessId.push(item.deliver_id)
+                })
+                console.log(bussinessName)
                 this.setState({
-                    selectedBusinessInfoRows: selectedRows
+                    selectedBusinessInfoRows: bussinessName, 
+                    bussinessId:bussinessId
                 }, () => {
-                    this.getBusinessSelectedRowsValue();
+                     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
                 })
             },
         }
 
         const agent_rowSelection = {
             onChange: (selectedRowKeys, selectedRows) => {
+                var agentName = '';
+                var agentId = [];
+                selectedRows.map(function(item){
+                    console.log(item)
+                    agentName = agentName + '/'+ item.agent_name + '  ';
+                    agentId.push(item.agent_id)
+                })
+                console.log(agentName)
                 this.setState({
-                    selectedAgentInfoRows: selectedRows
+                    selectedAgentRows: agentName, 
+                    agentId:agentId
                 }, () => {
-                    this.getAgentSelectedRowsValue();
+                     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
                 })
             },
         }
@@ -498,7 +642,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="药品名"
                                 >
                                     {getFieldDecorator('drug_name', {
-
+                                       initialValue:this.props.data.drug_name
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.drug_name} style={{ width: 200 }} />
@@ -513,11 +657,12 @@ export class MedincineOperationModel extends React.Component {
                                     label="生产厂家"
                                 >
                                     {getFieldDecorator('manufacturer_id', {
-
+                                        
                                     })(
                                         <div>
                                             <Input style={{ width: 200 }}
                                                 readOnly
+                                               
                                                 value={this.state.name}
                                                 prefix={<span style={{ marginLeft: 170, cursor: 'pointer' }}
                                                     onClick={this.showManufacturerInfo.bind(this)}><Icon type="edit" /></span>} />
@@ -532,7 +677,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="剂型"
                                 >
                                     {getFieldDecorator('dosage', {
-
+                                        initialValue:this.props.data.dosage
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.dosage} style={{ width: 200 }} />
@@ -547,7 +692,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="规格"
                                 >
                                     {getFieldDecorator('specification', {
-
+                                        initialValue:this.props.data.specification
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.specification} style={{ width: 200 }} />
@@ -562,7 +707,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="计量单位"
                                 >
                                     {getFieldDecorator('unit', {
-
+                                        initialValue:this.props.data.unit.toString()
                                     })(
                                         <Select
                                             showSearch
@@ -586,12 +731,12 @@ export class MedincineOperationModel extends React.Component {
                                     label="中标类型"
                                 >
                                     {getFieldDecorator('bid_type', {
-
+                                        initialValue:this.props.data.bid_type.toString()
                                     })(
                                         <Select
                                             showSearch
                                             style={{ width: 200 }}
-                                            initialValue={this.props.data.bid_type}
+                                            
                                             optionFilterProp="children"
                                             onChange={this.handleChangeType.bind(this)}
                                         >
@@ -614,7 +759,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="参考中标价"
                                 >
                                     {getFieldDecorator('bid_price', {
-
+                                        initialValue:this.props.data.bid_price
                                     })(
                                         <div>
                                             <Input style={{ width: 200 }} defaultValue={this.props.data.bid_price} /> 元
@@ -629,7 +774,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="开票价"
                                 >
                                     {getFieldDecorator('invoice_price', {
-
+                                        initialValue:this.props.data.invoice_price
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.invoice_price} style={{ width: 200 }} /> 元
@@ -643,7 +788,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="零售价"
                                 >
                                     {getFieldDecorator('retail_price', {
-
+                                        initialValue:this.props.data.retail_price
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.retail_price} style={{ width: 200 }} /> 元
@@ -658,7 +803,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="税价"
                                 >
                                     {getFieldDecorator('tax_price', {
-
+                                        initialValue:this.props.data.tax_price
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.tax_price} style={{ width: 200 }} /> 元
@@ -672,7 +817,7 @@ export class MedincineOperationModel extends React.Component {
                                     label="底价"
                                 >
                                     {getFieldDecorator('base_price', {
-
+                                        initialValue:this.props.data.base_price
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.base_price} style={{ width: 200 }} /> 元
@@ -686,8 +831,8 @@ export class MedincineOperationModel extends React.Component {
                                     {...formItemLayout}
                                     label="其他用费"
                                 >
-                                    {getFieldDecorator('other_price	', {
-
+                                    {getFieldDecorator('other_price', {
+                                        initialValue:this.props.data.other_price
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.other_price} style={{ width: 200 }} /> 元
@@ -706,7 +851,7 @@ export class MedincineOperationModel extends React.Component {
                                 {getFieldDecorator(' drug_billing', {
                                 })(
                                     <div className='addNodeInfo'>
-                                        {this.state.selectedValues}
+                                        {this.state.selectedBillingInfoRows}
                                         <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
                                             onClick={this.showCompany.bind(this)}><Icon type="plus-square" /></Button>
                                     </div>
@@ -720,7 +865,7 @@ export class MedincineOperationModel extends React.Component {
 
                                 })(
                                     <div className='addNodeInfo'>
-                                        {this.state.selectedBusinessInfoValues}
+                                        {this.state.selectedBusinessInfoRows}
                                         <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
                                             onClick={this.showBusinessCompany.bind(this)}><Icon type="plus-square" /></Button>
                                     </div>
@@ -734,9 +879,9 @@ export class MedincineOperationModel extends React.Component {
 
                                 })(
                                     <div className='addNodeInfo'>
-                                        {this.state.selectedAgentInfoValues}
-                                        <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
-                                            onClick={this.showAgentModal.bind(this)}><Icon type="plus-square" /></Button>
+                                        {this.state.selectedAgentRows}
+                                       <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
+                                            onClick={this.showAgent.bind(this)}><Icon type="plus-square" /></Button>
                                     </div>
                                     )}
                             </FormItem>
@@ -751,7 +896,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="新药分销"
                                     >
                                         {getFieldDecorator('if_distribution', {
-
+                                            initialValue:this.props.data.if_distribution
                                         })(
                                             <RadioGroup onChange={this.distribution.bind(this)} initialValue={1}>
                                                 <Radio value={1}>是</Radio>
@@ -767,9 +912,9 @@ export class MedincineOperationModel extends React.Component {
                                         label="是否停用"
                                     >
                                         {getFieldDecorator('if_disabled', {
-
+                                            initialValue:this.props.data.if_disabled
                                         })(
-                                            <RadioGroup onChange={this.disabled.bind(this)} initialValue={1}>
+                                            <RadioGroup onChange={this.disabled.bind(this)} >
                                                 <Radio value={1}>是</Radio>
                                                 <Radio value={2}>否</Radio>
                                             </RadioGroup>
@@ -782,7 +927,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="省级医保代码"
                                     >
                                         {getFieldDecorator('province_medicare_code', {
-
+                                            initialValue:this.props.data.province_medicare_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.province_medicare_code} style={{ width: 200 }} />
@@ -797,7 +942,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="国家医保代码"
                                     >
                                         {getFieldDecorator('country_medicare_code', {
-
+                                            initialValue:this.props.data.country_medicare_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.country_medicare_code} style={{ width: 200 }} />
@@ -811,7 +956,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="营业执照代码"
                                     >
                                         {getFieldDecorator('business_license_code', {
-
+                                            initialValue:this.props.data.business_license_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.business_license_code} style={{ width: 200 }} />
@@ -826,8 +971,9 @@ export class MedincineOperationModel extends React.Component {
                                         label="营业执照过期日期"
                                     >
                                         {getFieldDecorator('business_license_expire_time', {
+                                            initialValue:moment(this.props.data.business_license_expire_time*1000)
                                         })(
-                                            <DatePicker defaultValue={this.props.business_license_expire_time} style={{ width: 200 }} />
+                                            <DatePicker  style={{ width: 200 }} />
                                             )}
                                     </FormItem>
                                 </Col>
@@ -837,7 +983,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="GMP代码"
                                     >
                                         {getFieldDecorator('gmp_code', {
-
+                                            initialValue:this.props.data.gmp_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.gmp_code} style={{ width: 200 }} />
@@ -852,8 +998,9 @@ export class MedincineOperationModel extends React.Component {
                                         label="GMP过期日期"
                                     >
                                         {getFieldDecorator('gmp_expire_time', {
+                                            initialValue:moment(this.props.data.gmp_expire_time*1000)
                                         })(
-                                            <DatePicker defaultValue={this.props.gmp_expire_time} style={{ width: 200 }} />
+                                            <DatePicker initialValue={this.props.gmp_expire_time} style={{ width: 200 }} />
                                             )}
                                     </FormItem>
                                 </Col>
@@ -863,7 +1010,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="生产许可证"
                                     >
                                         {getFieldDecorator('production_license', {
-
+                                                initialValue:this.props.data.production_license
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.production_license} style={{ width: 200 }} placeholder='' />
@@ -878,8 +1025,9 @@ export class MedincineOperationModel extends React.Component {
                                         label="生产许可证有效期"
                                     >
                                         {getFieldDecorator('production_expire_time', {
+                                            initialValue:moment(this.props.data.production_expire_time*1000)
                                         })(
-                                            <DatePicker defaultValue={this.props.production_expire_time} style={{ width: 200 }} />
+                                            <DatePicker initialValue={this.props.production_expire_time} style={{ width: 200 }} />
                                             )}
                                     </FormItem>
                                 </Col>
@@ -889,7 +1037,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="委托书"
                                     >
                                         {getFieldDecorator('proxy', {
-
+                                            initialValue:this.props.data.proxy
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.proxy} style={{ width: 200 }} />
@@ -904,8 +1052,9 @@ export class MedincineOperationModel extends React.Component {
                                         label="委托书有效期"
                                     >
                                         {getFieldDecorator('proxy_expire_time', {
+                                            initialValue:moment(this.props.data.proxy_expire_time*1000)
                                         })(
-                                            <DatePicker defaultValue={moment(this.props.proxy_expire_time)} style={{ width: 200 }} />
+                                            <DatePicker initialValue={moment(this.props.proxy_expire_time)} style={{ width: 200 }} />
                                             )}
                                     </FormItem>
                                 </Col>
@@ -915,7 +1064,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="协议区域"
                                     >
                                         {getFieldDecorator('protocol_region', {
-
+                                            initialValue:this.props.data.protocol_region
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.protocol_region} style={{ width: 200 }} />
@@ -937,7 +1086,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="创建人"
                                     >
                                         {getFieldDecorator('creater', {
-
+                                            initialValue:this.props.data.creator_name
                                         })(
                                             <div>
                                                 <p>{this.props.data.creator_name}</p>
@@ -952,7 +1101,7 @@ export class MedincineOperationModel extends React.Component {
                                         label="创建时间"
                                     >
                                         {getFieldDecorator('create_time', {
-
+                                            initialValue:this.props.data.create_time
                                         })(
                                             <div>
                                                 <p>{this.props.data.create_time}</p>
@@ -965,10 +1114,10 @@ export class MedincineOperationModel extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('drug_remark', {
-
+                                        initialValue:this.props.data.drug_remark
                                     })(
                                         <div>
-                                            <input value={this.props.data.drug_remark} type='textarea' className='my_textarea_style' />
+                                            <input  type='textarea' defaultValue={this.props.data.drug_remark} className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -994,7 +1143,9 @@ export class MedincineOperationModel extends React.Component {
                         style={{ marginBottom: 10 }}
                     />
                     <Table rowKey columns={columns}
-                        dataSource={this.props.searchManufacInfo.data ? this.props.searchManufacInfo.data : this.props.manufacturerList.data} onRowClick={this.rowClick.bind(this)} />
+                        dataSource={this.props.searchManufacInfo.data ? this.props.searchManufacInfo.data : this.props.manufacturerList.data} 
+                        onRowClick={this.rowClick.bind(this)} 
+                        rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/>
                 </Modal>
 
                 <Modal
@@ -1008,8 +1159,7 @@ export class MedincineOperationModel extends React.Component {
                         onSearch={this.getCompanyInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowSelection={rowSelection} columns={columns_compony}
-                        dataSource={this.props.searchBilingComInfo.data ? this.props.searchBilingComInfo.data : this.props.bilingListInfo.data} />
+                    <Table rowSelection={billing_rowSelection} columns={columns_compony} dataSource={this.props.bilingListInfo.data} />
                 </Modal>
 
                 <Modal
@@ -1023,21 +1173,21 @@ export class MedincineOperationModel extends React.Component {
                         onSearch={this.getBusinessCompanyInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowSelection={business_rowSelection} columns={columns_BusinessCom} dataSource={this.props.searchBusinessComInfo.data ? this.props.searchBusinessComInfo.data : this.props.businessComInfo.data} />
+                    <Table rowSelection={business_rowSelection} columns={columns_BusinessCom} dataSource={this.props.businessComInfo} />
                 </Modal>
 
                 <Modal
                     title="代理商列表"
                     visible={this.state.showAgentVisible}
-                    onOk={this.handleOkAgentModal.bind(this)}
-                    onCancel={this.handleCancelAgentModal.bind(this)}
+                    onOk={this.handleOkAgentInfo.bind(this)}
+                    onCancel={this.handleCancelAgentNameInfo.bind(this)}
                 >
                     <Search
                         placeholder="输入客户ID/姓名/联系方式"
-                        onSearch={this.getBusinessCompanyInfoSearchValue.bind(this)}
+                        onSearch={this.getAgentInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowSelection={agent_rowSelection} columns={columns_agent} dataSource={this.props.agentInfo.data }/>
+                    <Table rowSelection={agent_rowSelection} columns={columns_agent} dataSource={this.props.agentList.data} />
                 </Modal>
 
                 <Modal
@@ -1053,6 +1203,7 @@ export class MedincineOperationModel extends React.Component {
     }
 }
 function mapStateToProps(state) {
+    console.log()
     return {
         //获取药品信息
         drugsListInfo: state.drugListInfo.data,
@@ -1063,7 +1214,7 @@ function mapStateToProps(state) {
         searchManufacInfo: state.drugListInfo.searchManufacInfo,
         searchBilingComInfo: state.drugListInfo.searchBilingComInfo,
         searchBusinessComInfo: state.drugListInfo.searchBusinessComInfo,
-        agentInfo:state.drugListInfo.agentInfo
+        agentList:state.drugListInfo.agentInfo
     }
 }
 function mapDispatchToProps(dispatch) {
@@ -1074,10 +1225,6 @@ function mapDispatchToProps(dispatch) {
         editDrugInfo: (data) => dispatch(actionCreater.editClickDrugInfo(data)),
         //获取生产厂家信息
         getManufacturerList: (param) => dispatch(actionCreater.getManufacturerListInfo(param)),
-        //获取开票公司信息
-        getBillingComponyList: (param) => dispatch(actionCreater.getBillingComponyListInfo(param)),
-        //获取商业公司信息
-        getBusinessComList: (param) => dispatch(actionCreater.getBusinessComListinfo(param)),
         //删除药品信息
         delDrugInfo: (param) => dispatch(actionCreater.delDrugInfoList(param)),
         //搜索生产厂家
@@ -1086,8 +1233,12 @@ function mapDispatchToProps(dispatch) {
         searchBilingComponyInfo: (param) => dispatch(actionCreater.searchBilingComponyInfoList(param)),
         //搜索商业公司
         searchBusinessComInfo: (param) => dispatch(actionCreater.searchBusinessComInfoList(param)),
+        //获取开票公司信息
+        getBillingComponyList: (param) => dispatch(actionCreater.getBillingComponyListInfo(param)),
+        //获取商业公司信息
+        getBusinessComList: (param) => dispatch(actionCreater.getBusinessComListinfo(param)),
         //获取代理商信息
-        getAgent:(param) => dispatch(actionCreater.getAgentInfo(param)),
+        getAgentList:(param) => dispatch(actionCreater.getAgentInfo(param)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(MedincineOperationModel))

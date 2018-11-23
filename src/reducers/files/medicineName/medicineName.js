@@ -13,11 +13,15 @@ export default function redeceName(state, action) {
             newState.delDrugNameCode = action.payload.data;
             break;
         case 'SEARCH_MEDICINENAME_INFO':
-            newState.searchDrugInfo = action.payload.data;
+            newState.data = action.payload.data;
             break;
         case 'ADD_DRUGNAME_INFO':
             newState.addDrugNameCode = action.payload.data;
             break;
+        case 'GET_USER_INFO':
+            newState.userInfo = action.payload.data;
+            break;
+
     }
     return newState;
 }

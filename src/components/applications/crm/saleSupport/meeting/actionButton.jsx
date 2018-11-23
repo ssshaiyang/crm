@@ -42,16 +42,28 @@ export class SubmitModal extends React.Component{
 	push(sale_support_id){
 		console.log(sale_support_id)
 		function cb(res) {
+			let that = this;
+			console.log(res)
 			if (res.error_code === GLOBALSUCCESS) {
-				this.props.initPagination();
-				this.props.refreshList({
-					page: 1,
-					limit: 5
-				});
+				console.log(that)
 				message.success("提交成功!")
+				that.props.over();
+				// that.props.refreshList({
+				// 	page: 1,
+				// 	limit: 5
+				// });
+				
 			}
 		}
-		this.props.submit(sale_support_id)
+		Modal.confirm({
+			title: '提交',
+			content: '确定要提交吗',
+			onOk: () => {
+				
+				this.props.submit(sale_support_id , cb.bind(this))
+			}
+		})
+		
 		// const material_apply_status = this.props.data.material_apply_status;
 		// Modal.confirm({
 		// 	title: '提交',
@@ -72,9 +84,9 @@ export class SubmitModal extends React.Component{
 		const button = this.props.data.meeting_apply_status == 0 ?
 					(<div><Button icon="edit" className="gridButton" onClick={this.edit.bind(this,meeting_apply_id)}/>
 					<Button icon="to-top" className="gridButton"  onClick={this.push.bind(this,meeting_apply_id)}/></div> )
-		: (<Button icon="select" className="gridButton" >
-			<Link to={'/work/approval'}></Link>
-			</Button>)
+		: (
+			<Link to={'/work/approval'}><Button icon="select" className="gridButton" ></Button></Link>
+			)
 		return (
 			<div>
 			{button}

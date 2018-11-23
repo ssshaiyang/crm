@@ -47,10 +47,11 @@ export class ApprovalOpinionModel extends React.Component {
 		this.props.form.validateFields((err, values) => {
 			if (!err) {
 				let params = {
-					approval_status: this.props.state ? 2 : 3,
+                    type_id: this.props.state ? 2 : 3,
 					approval_record_remark: values.approval_record_remark || "",
 					approval_id: this.props.approvalId
 				}
+				console.log(params)
 				this.props.confirmOpinion(params, cb.bind(this))
 			}
 		});

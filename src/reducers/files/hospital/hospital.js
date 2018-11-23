@@ -21,9 +21,7 @@ export default function redeceName(state, action) {
         case 'ADD_POLICY_GET_HOSPITAL_INFO':
             newState.costPolicyInfo = action.payload.data;
             break;
-        case 'ADD_POLICY_GET_HOSPTIAL':
-            newState.getPolicyHospital = action.payload.data;
-            break;
+       
     }
     return newState;
 }

@@ -5,9 +5,14 @@ export default function redeceName(state, action) {
     switch (action.type) {
         case 'GET_SELECT_DEPART_LIST':
             newState.data = action.payload.visible;
-            newState.code = action.payload.code
             break;
         case 'ADD_DEPART_INFO':
+            newState.code = action.payload.code
+            break;
+        case 'CHECK_CODE':
+            newState.code = action.payload.code
+            break;
+        case 'ADD_DEPART_INFO_MODEL':
             newState.code = action.payload.code
             break;
     }

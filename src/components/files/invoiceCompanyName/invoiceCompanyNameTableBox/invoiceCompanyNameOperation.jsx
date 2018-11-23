@@ -11,20 +11,43 @@ const Option = Select.Option;
 
 export class BusinessComnopyNameOperation extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             delAgentVisible: false,
             addMechInfoVisible: false,
             showMedicineNameVisible: false,
             searchText: '',
-            filtered: false
+            filtered: false,
+            name: this.props.data.billing_name,
+            id: this.props.data.billing_id
         }
     }
 
     componentWillMount() {
-
+        console.log(this.props.data)
     }
+
+    componentWillReceiveProps(nextProps){
+
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingNameList(params)
+                console.log("自动刷新")
+        }
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingNameList(params)
+                console.log("自动刷新")
+        }
+     }
+
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
@@ -120,7 +143,7 @@ export class BusinessComnopyNameOperation extends React.Component {
                         creator_name: this.props.userInfo.username,
                         different_billing_remark: values.different_billing_remark
                     },
-                    id: this.props.data.billing_id
+                    id: this.props.data.different_billing_id
                 }
                 this.props.editBillingName(params);
                 this.props.getBillingNameList(param);
@@ -143,7 +166,7 @@ export class BusinessComnopyNameOperation extends React.Component {
             page: -1,
             limit: 10
         }
-        this.props.delDiffBillingName(this.props.data.billing_id);
+        this.props.delDiffBillingName(this.props.data.different_billing_id);
         this.props.getBillingNameList(param);
         this.setState({
             delAgentVisible: false
@@ -154,7 +177,7 @@ export class BusinessComnopyNameOperation extends React.Component {
 
     handleCancelDelAgent() {
         this.setState({
-            agentModelVisible: false
+            delAgentVisible: false
         })
     }
 
@@ -233,10 +256,10 @@ export class BusinessComnopyNameOperation extends React.Component {
                                     label="异名商业公司名"
                                 >
                                     {getFieldDecorator('different_billing_name', {
-
+                                        initialValue:this.props.data.different_billing_name
                                     })(
                                         <div>
-                                            <Input style={{ width: 200 }} />
+                                            <Input defaultValue={this.props.data.different_billing_name} style={{ width: 200 }} />
                                         </div>
                                         )}
                                 </FormItem>
@@ -251,10 +274,10 @@ export class BusinessComnopyNameOperation extends React.Component {
                                         label="创建人"
                                     >
                                         {getFieldDecorator('creator_name', {
-
+                                            initialValue:this.props.data.creator_name
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -279,10 +302,10 @@ export class BusinessComnopyNameOperation extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('different_billing_remark', {
-
+                                        initialValue:this.props.data.different_billing_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' />
+                                            <input defaultValue={this.props.data.different_billing_remark} type='textarea' className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -318,7 +341,7 @@ export class BusinessComnopyNameOperation extends React.Component {
                     onOk={this.handleOkDelAgent.bind(this)}
                     onCancel={this.handleCancelDelAgent.bind(this)}
                 >
-                    <span>确定要删除此人的信息吗?</span>
+                    <span>确定要删除此条信息吗?</span>
                 </Modal>
             </div>
         )
@@ -331,6 +354,8 @@ function mapStateToProps(state) {
         rowData: state.billingInfo.data,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        editCode:state.diffBillingInfo.editDiffBillingCode,
+        delCode:state.diffBillingInfo.delDiffBillingCode
     }
 }
 function mapDispatchToProps(dispatch) {

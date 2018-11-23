@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Card, Input, Button, Form, Icon } from 'antd'
+import moment from 'moment'
 import Grid from '../../../common/Grid.jsx'
 import ContactInformationModel from './contactInformationModel.jsx'
 import OrporateBankAccountModel from './orporateBankAccountModel.jsx'
@@ -21,7 +22,32 @@ export class ManufacturerTableBox extends React.Component {
             limit: 10
         }
         this.props.getManufacturerInfo(param);
+        console.log()
     }
+
+    componentDidMount(){
+        console.log(this.props.rowData)
+    }
+
+    componentWillReceiveProps(nextProps){
+        var manufactListInfo = [];
+        console.log(nextProps.rowData.data);
+        manufactListInfo = nextProps.rowData.data;
+        manufactListInfo.map(item=>{
+            item.business_license_expire_time_show = this.setDate(item.business_license_expire_time);
+            item.proxy_expire_time_show = this.setDate(item.proxy_expire_time);
+            item.gmp_expire_time_show = this.setDate(item.gmp_expire_time);
+            item.production_expire_time_show = this.setDate(item.production_expire_time);
+        })
+       
+    }
+
+    setDate(date){
+       return  moment(date*1000).format("YYYY-MM-DD")
+    }
+
+
+
     createColumnDefs() {
         return [
             {
@@ -63,7 +89,7 @@ export class ManufacturerTableBox extends React.Component {
             },
             {
                 headerName: "营业执照过期日期",
-                field: 'business_license_expire_time',
+                field: 'business_license_expire_time_show',
                 width: 150,
             },
             {
@@ -73,7 +99,7 @@ export class ManufacturerTableBox extends React.Component {
             },
             {
                 headerName: "GMP过期日期",
-                field: 'gmp_expire_time',
+                field: 'gmp_expire_time_show',
                 width: 120,
             },
             {
@@ -83,7 +109,7 @@ export class ManufacturerTableBox extends React.Component {
             },
             {
                 headerName: "生产许可证有效期",
-                field: 'production_expire_time',
+                field: 'production_expire_time_show',
                 width: 140,
             },
             {
@@ -93,7 +119,7 @@ export class ManufacturerTableBox extends React.Component {
             },
             {
                 headerName: "委托书有效期",
-                field: 'proxy_expire_time',
+                field: 'proxy_expire_time_show',
                 width: 140,
             },
             {

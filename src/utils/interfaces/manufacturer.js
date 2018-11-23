@@ -280,3 +280,25 @@ export const delManuInfoLists = function (params, cb) {
     // }, false, params);
     del('/manufacturer/' + params, null, cb);
 }
+
+//编辑
+export const editManuInfoLists = function (params, cb) {
+    console.log(params)
+  //   {
+  //     "manufacturer_name":"生产厂家名称",
+  //     ...
+  //     "manufacturer_remark":"备注",
+  //     "manufacturer_contact": [{
+  //     "manufacturer_contact_id":"1",
+  //     "manufacturer_contact_name":"生产厂家联系人姓名",
+  //     ...
+  //     "manufacturer_contact_email":"163@qq.com"
+  //     }...],
+  //     "manufacturer_account":[{
+  //     "manufacturer_contact_id":"3",
+  //     "manufacturer_bank_account":"生产厂家银行账号",
+  //     "manufacturer_account_user":"生产厂家开户人名"
+  //     }...]
+  // }
+    put('/manufacturer/' + params.id , params.values ,cb)
+}

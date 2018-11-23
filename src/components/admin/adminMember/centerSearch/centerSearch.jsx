@@ -85,32 +85,66 @@ export class CenterSearch extends React.Component {
 
     makeSelectCol(colNumber, additionNode = false) {
         const title = ['部门', '职位'][colNumber];
+        console.log(this.props.branchOptions)
         const options = [this.props.branchOptions, this.props.positionOptions][colNumber];
         const value = [this.props.branch, this.props.position][colNumber]
-        const keys = Object.keys(options)
-        return (
-            <Col span={6}>
-                <Row type="flex" align="middle">
-                    <Col md={{span:8}} xs={{span:10}}>
-                        <span>{title}</span>
+        let keys =[]
+        if(colNumber==0){
+            if(options.department!= undefined){
+                keys = Object.keys(options.department)
+                return (
+                    <Col span={6}>
+                        <Row type="flex" align="middle">
+                            <Col md={{span:8}} xs={{span:10}}>
+                                <span>{title}</span>
+                            </Col>
+                            <Col md={{span:16}} xs={{span:14}}>
+                                <Select
+                                    defaultValue="0"
+                                    value={value}
+                                    style={{width:'100%'}}
+                                    onChange={this.handleChange.bind(this,colNumber)}>
+                                    {additionNode}
+                                    {keys.map(key=>(
+                                        <Option value={options.parent_id[key]} key={key}>
+                                            {options.department[key]}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Col>
+                        </Row>
                     </Col>
-                    <Col md={{span:16}} xs={{span:14}}>
-                        <Select
-                            defaultValue="0"
-                            value={value}
-                            style={{width:'100%'}}
-                            onChange={this.handleChange.bind(this,colNumber)}>
-                            {additionNode}
-                            {keys.map(key=>(
-                                <Option value={key} key={key}>
-                                    {options[key]}
-                                </Option>
-                            ))}
-                        </Select>
+                )
+            }
+        }else{
+            if(options.position!=undefined){
+                keys = Object.keys(options.position)
+                return (
+                    <Col span={6}>
+                        <Row type="flex" align="middle">
+                            <Col md={{span:8}} xs={{span:10}}>
+                                <span>{title}</span>
+                            </Col>
+                            <Col md={{span:16}} xs={{span:14}}>
+                                <Select
+                                    defaultValue="0"
+                                    value={value}
+                                    style={{width:'100%'}}
+                                    onChange={this.handleChange.bind(this,colNumber)}>
+                                    {additionNode}
+                                    {keys.map(key=>(
+                                        <Option value={options.parent_id[key]} key={key}>
+                                            {options.position[key]}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Col>
+                        </Row>
                     </Col>
-                </Row>
-            </Col>
-        )
+                )
+            }
+        }
+
     }
 
     render() {
@@ -142,11 +176,18 @@ export class CenterSearch extends React.Component {
 
 function mapStateToProps(state) {
     const filter = state.centerSearch
+    var positionList =[];
+    if(filter.positionOptions.position == undefined){
+        positionList =[];
+    }else{
+        positionList = filter.positionOptions;
+    }
+    console.log(positionList)
     return {
         branch: filter.branch,
         branchOptions: filter.developmentOptions,
         position: filter.position,
-        positionOptions: filter.positionOptions
+        positionOptions: positionList
     }
 }
 

@@ -59,7 +59,7 @@ export const replyApproval = function(params, cb) {
 	// 	"error_code": 1000,
 	// 	"data": true
 	// });
-	let url = '/approvals/' + params.approval_id + '/promise';
+	let url = '/approvals/' + params.approval_id + '/promise/'+params.type_id;
 	put(url, params, cb)
 }
 

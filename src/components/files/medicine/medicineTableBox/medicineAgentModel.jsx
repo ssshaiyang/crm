@@ -44,7 +44,7 @@ export class MedicineAgentModel extends React.Component {
             dataIndex: 'agent_id',
             key: 'agent_id'
         }, {
-            title: '开票公司名称',
+            title: '代理商名称',
             dataIndex: 'agent_name',
             key: 'agent_name',
         }];

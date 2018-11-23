@@ -12,17 +12,40 @@ const { Column, ColumnGroup } = Table;
 
 export class HospitalOperation extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             delAgentVisible: false,
             addMechInfoVisible: false,
             showMedicineNameVisible: false,
+            value:this.props.data.hospital_type_id,
+            areaProvinceCode: this.props.data.hospital_province,
+            areaCityCode: this.props.data.hospital_city,
+            areaDistrictCode: this.props.data.hospital_district,
         }
     }
 
     componentWillMount() {
+        console.log(this.props.data)
+    }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getHospital(params)
+            console.log("自动刷新")
+        }
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getHospital(params)
+            console.log("自动刷新")
+        }
     }
 
     /**
@@ -73,9 +96,9 @@ export class HospitalOperation extends React.Component {
                     value: {
                         hospital_name: values.hospital_name !== this.props.data.hospital_name ? values.hospital_name : this.props.data.hospital_name,
                         hospital_type: this.state.value,
-                        hospital_province: this.state.area[0],
-                        hospital_city: this.state.area[1],
-                        hospital_district: this.state.area[2],
+                        hospital_province: this.state.areaProvinceCode,
+                        hospital_city: this.state.areaCityCode,
+                        hospital_district: this.state.areaDistrictCode,
                         hospital_address: values.hospital_address !== this.props.hospital_address ? values.hospital_address : this.props.data.hospital_address,
                         hospital_remark: values.hospital_remark !== this.props.hospital_remark ? values.hospital_remark : this.props.data.hospital_remark,
                         creator_name: this.props.userInfo.username
@@ -115,7 +138,7 @@ export class HospitalOperation extends React.Component {
         this.setState({
             delAgentVisible: false
         }, () => {
-            this.props.delHospital(param);
+            this.props.getHospital(param);
         })
     }
 
@@ -141,7 +164,10 @@ export class HospitalOperation extends React.Component {
     //级联选择框选择的值
     selectArea(value) {
         this.setState({
-            area: value
+            areaProvinceCode: value[0],
+            areaCityCode:value[1],
+            areaDistrictCode:value[2]
+
         })
     }
 
@@ -208,10 +234,10 @@ export class HospitalOperation extends React.Component {
                                     label="医院名称"
                                 >
                                     {getFieldDecorator('hospital_name', {
-
+                                        initialValue:this.props.data.hospital_name
                                     })(
                                         <div>
-                                            <Input style={{ width: 200 }} />
+                                            <Input defaultValue={this.props.data.hospital_name} style={{ width: 200 }} />
                                         </div>
                                         )}
                                 </FormItem>
@@ -223,7 +249,7 @@ export class HospitalOperation extends React.Component {
                                     label="医院类型"
                                 >
                                     {getFieldDecorator('hospital_type', {
-
+                                        initialValue:this.props.data.hospital_type
                                     })(
                                         <Select
                                             showSearch
@@ -246,7 +272,7 @@ export class HospitalOperation extends React.Component {
 
                                     })(
                                         <div>
-                                            <Cascader options={this.props.areaInfo} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" />
+                                            <Cascader defaultValue={[this.state.areaProvinceCode,this.state.areaCityCode,this.state.areaDistrictCode]} options={this.props.areaInfo[0]} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" />
                                         </div>
                                         )}
                                 </FormItem>
@@ -261,10 +287,10 @@ export class HospitalOperation extends React.Component {
                                 label="医院地址"
                             >
                                 {getFieldDecorator('hospital_address', {
-
+                                    initialValue:this.props.data.hospital_address
                                 })(
                                     <div>
-                                        <Input placeholder='请输入医院地址' />
+                                        <Input defaultValue={this.props.data.hospital_address} placeholder='请输入医院地址' />
                                     </div>
                                     )}
                             </FormItem>
@@ -282,7 +308,7 @@ export class HospitalOperation extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -297,7 +323,7 @@ export class HospitalOperation extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{new Date().toLocaleDateString()}</p>
+                                                <p>{this.props.data.create_time}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -307,10 +333,10 @@ export class HospitalOperation extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('hospital_remark', {
-
+                                        initialValue:this.props.data.hospital_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' />
+                                            <input defaultValue={this.props.data.hospital_remark} type='textarea' className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -350,6 +376,8 @@ function mapStateToProps(state) {
         areaInfo: areaList,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        editCode:state.hospitalInfo.editHospitalCode,
+        delCode:state.hospitalInfo.delHospitalCode
     }
 }
 function mapDispatchToProps(dispatch) {

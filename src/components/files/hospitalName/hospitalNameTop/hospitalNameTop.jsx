@@ -48,9 +48,25 @@ export class HospitalNameTop extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDiffHospital(params)
+            console.log("自动刷新")
+        }
+    }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
-        //console.log('ssss', value)
+         let params = {
+            filter: value,
+            page: -1,
+            limit: 10
+        }
+        this.props.getDiffHospital(params);
     }
 
     /**
@@ -81,10 +97,11 @@ export class HospitalNameTop extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record, index) {
         this.setState({
             hospital_name: record.hospital_name,
-            hospital_id:record.hospital_id
+            hospital_id:record.hospital_id,
+            rowclicked: index
         })
     }
 
@@ -119,7 +136,8 @@ export class HospitalNameTop extends React.Component {
                     hospital_id:this.state.hospital_id,
                     hospital_name:this.state.hospital_name,
                     different_hospital_name:value.different_hospital_name,
-                    different_hospital_remark:value.different_hospital_remark
+                    different_hospital_remark:value.different_hospital_remark,
+                    creator_name:this.props.userInfo.nickname
                 }
                 this.props.addDiffHospital(params);
             }
@@ -167,9 +185,9 @@ export class HospitalNameTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -250,7 +268,7 @@ export class HospitalNameTop extends React.Component {
                                         label="创建时间"
                                     >
                                         {getFieldDecorator('create_time', {
-
+                                            initialValue:new Date().toLocaleDateString()
                                         })(
                                             <div>
                                                 <p>{new Date().toLocaleDateString()}</p>
@@ -290,7 +308,7 @@ export class HospitalNameTop extends React.Component {
                     onCancel={this.handleCancelMedicineInfo.bind(this)}
                 >
                     <Row>
-                        <Col span={11}>
+                        {/*<Col span={11}>
                             <Search
                                 placeholder="输入地区"
                                 onSearch={this.getMedicineNameSearchValue.bind(this)}
@@ -314,15 +332,17 @@ export class HospitalNameTop extends React.Component {
                                     <TreeNode title="黄石" key="huangshi" />
                                 </TreeNode>
                             </Tree>
-                        </Col>
-                        <Col span={1}></Col>
-                        <Col span={12}>
+                        </Col>*/}
+                        
+                        <Col span={24}>
                             <Search
                                 placeholder="输入客户ID/姓名/联系方式"
                                 onSearch={this.getMedicineNameSearchValue.bind(this)}
                                 style={{ marginBottom: 10 }}
                             />
-                            <Table rowKey='key' columns={columns} dataSource={this.props.rowData ? this.props.rowData.data : []} onRowClick={this.rowClick.bind(this)}/>
+                            <Table rowKey='key' columns={columns} dataSource={this.props.rowData ? this.props.rowData.data : []} 
+                            onRowClick={this.rowClick.bind(this)} rowKey
+                            rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/>
                         </Col>
                     </Row>
                 </Modal>
@@ -343,6 +363,7 @@ function mapStateToProps(state) {
         rowData: state.hospitalInfo.data,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        addCode:state.drugNameListInfo.addDiffHispitalCode
     }
 }
 
@@ -354,6 +375,8 @@ function mapDispatchToProps(dispatch) {
         getHospital: (params) => dispatch(actionCreater.getHospitalInfo(params)),
         //添加医院异名
         addDiffHospital:(params) => dispatch(actionCreator.addDiffHospitalInfo(params)),
+        //获取
+        getDiffHospital: (params) => dispatch(actionCreator.getDiffHospitalInfo(params)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(HospitalNameTop))

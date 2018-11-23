@@ -54,16 +54,17 @@ export class PolicyApply extends React.Component {
 	}
 
 	getList(params = {}) {
+		console.log(this.state.startTime)
 		let param = {
 			policy_apply_status: params.policy_apply_status || this.state.status,
 			approval_types: params.approval_types || this.state.type,
 			page: params.page || this.state.page,
 			limit: params.limit || this.state.limit,
 			filter: params.filter || this.state.filter,
-			start_time: exportDate(params.startTime || this.state.startTime),
-			end_time: exportDate(params.endTime || this.state.endTime)
+			start_time: exportDate(params.startTime  ),
+			end_time: exportDate(params.endTime )
 		}
-
+		console.log(param)
 		function cb(res) {
 			if (res.error_code === GLOBALSUCCESS) {
 				console.log(res)
@@ -116,11 +117,17 @@ export class PolicyApply extends React.Component {
 	}
 
 	changeRange(range) {
+		console.log(range)
 		this.changePagination(0, 5);
 		const params = {
 			startTime: range[0],
 			endTime: range[1]
 		}
+		this.setState({
+			startTime:range[0],
+			endTime: range[1]
+		})
+		console.log(params)
 		this.getList(params)
 		this.setState(params)
 	}

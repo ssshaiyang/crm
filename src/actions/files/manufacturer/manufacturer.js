@@ -1,6 +1,6 @@
 import {
     getManufacturerListInfos, manufacturerContactListInfos, addContactInfoListInfo, addBankAccountInfoList,
-    getBankAccountInfoList,getAreaInfoList,delManuInfoLists
+    getBankAccountInfoList,getAreaInfoList,delManuInfoLists,editManuInfoLists
 }
     from "../../../utils/interface.js"
 
@@ -133,6 +133,24 @@ export const delManuInfoList = function (param) {
             }
         }
         delManuInfoLists(param, cb);
+    }
+}
+
+//编辑生产厂家
+export const editManufacturerInfoList = function (params) {
+    return (dispatch) => {
+        function cb(res) {
+            if (res.error_code === GLOBALSUCCESS) {
+                let action = {
+                    type: "EDIT_MANU_INFO",
+                    payload: {
+                        data: res.data
+                    }
+                }
+                dispatch(action);
+            }
+        }
+        editManuInfoLists(params, cb);
     }
 }
 

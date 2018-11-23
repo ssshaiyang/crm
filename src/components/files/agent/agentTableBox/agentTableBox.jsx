@@ -5,7 +5,7 @@ import { Card, Input, Button, Form, Icon } from 'antd'
 import Grid from '../../../common/Grid.jsx'
 import BankAccountModel from './bankAccount.jsx'
 import AgentOperationModel from './agentOperation.jsx'
-
+import ContactModel from './contactFormation.jsx'
 import * as actionCreator from "../../../../actions/files/agent/agent.js"
 import * as actionUser from "../../../../actions/files/medicineName/medicineName.js"
 
@@ -41,7 +41,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "所属地区",
-                field: 'agent_address',
+                field: 'agent_area',
                 width: 100,
 
             },
@@ -53,63 +53,22 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "招商人员",
-                field: 'employee_id',
+                field: 'employee_name',
                 width: 100,
 
             },
-            {
-                headerName: "联系人姓名",
-                field: 'agent_contact_name[0]',
-                width: 100,
+            
+            // {
+            //     headerName: "付款方式",
+            //     field: 'payment_type',
+            //     width: 100,
 
-            },
+            // },
             {
-                headerName: "手机号码",
-                field: 'agent_contact_telephone',
+                headerName: "联系人信息",
+                field: 'agent_contact',
                 width: 100,
-
-            },
-            {
-                headerName: "固定电话",
-                field: 'agent_contact_phone',
-                width: 100,
-
-            },
-            {
-                headerName: "传真",
-                field: 'agent_contact_fax',
-                width: 100,
-
-            },
-            {
-                headerName: "微信",
-                field: 'agent_contact_webchat',
-                width: 100,
-
-            },
-            {
-                headerName: "QQ号",
-                field: 'agent_contact_qq',
-                width: 100,
-
-            },
-            {
-                headerName: "邮箱",
-                field: 'agent_contact_email',
-                width: 100,
-
-            },
-            {
-                headerName: "身份证号码",
-                field: 'agent_contact_card',
-                width: 100,
-
-            },
-            {
-                headerName: "付款方式",
-                field: 'payment_type',
-                width: 100,
-
+                cellRendererFramework: ContactModel,
             },
             {
                 headerName: "银行账户",

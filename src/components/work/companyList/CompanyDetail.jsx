@@ -67,7 +67,7 @@ export class CompanyDetail extends React.Component {
 					</Col>
 				</Row> */}
 				<div style={styles.imgStyle}>
-					<img src={this.props.company_logo} alt="company_logo" />
+					<img style={{width:"100%"}} src={this.props.company_logo} alt="company_logo" />
 				</div>
 				<div style={styles.companyName}>
 					{this.props.company_name}

@@ -55,12 +55,12 @@ export class MannameTop extends React.Component {
 
     }
 
-    componentWillUpdate() {
+    componentWillReceiveProps(nextProps) {
         let data = {
             page: -1,
             limit: 10
         }
-        if(this.props.addManuCode==1000){
+        if(nextProps.addManuCode==1000 & this.props.addManuCode !==1000){
             this.props.getManufacturerNameList(data);
         }
     }
@@ -107,11 +107,12 @@ export class MannameTop extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record, index) {
         //console.log('sssssss',record)
         this.setState({
             name: record.manufacturer_name,
-            id: record.manufacturer_id
+            id: record.manufacturer_id,
+            rowclicked:index
         })
         console.log(this.state.name)
         
@@ -169,6 +170,13 @@ export class MannameTop extends React.Component {
                     // create_time:this.state.timestamp,
                 }
                 this.props.addManuNameinfo(addManuName);
+            }
+            let data = {
+                page: -1,
+                limit: 10
+            }
+            if(this.props.addManuCode==1000){
+                this.props.getManufacturerNameList(data);
             }
         });
     }
@@ -257,9 +265,9 @@ export class MannameTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
+                        {/*<Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -384,7 +392,9 @@ export class MannameTop extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)} />
+                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)}
+                    rowKey
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />
                 </Modal>
             </div>
         )

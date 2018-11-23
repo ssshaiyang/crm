@@ -33,6 +33,7 @@ import {
 import {
 	globalChangeCompanyLogined
 } from '../../../actions/global.js'
+import {cookie} from "../../../utils/interface";
 
 let styles = {
 	submitButton: {
@@ -56,7 +57,10 @@ class CompanyLoginModel extends React.Component {
 
 		function cb(res, error, params) {
 			if (res.error_code === GLOBALSUCCESS) {
+				console.log(res)
+				sessionStorage.setItem("company_id",this.props.company_id)
 				message.info('企业登录成功!');
+                sessionStorage.setItem('companyuserid', res.data);
 				sessionStorage.setItem('epluscompanyName', this.props.company_name);
 				this.props.loginCompany(this.props.company_name);
 				this.props.form.resetFields();

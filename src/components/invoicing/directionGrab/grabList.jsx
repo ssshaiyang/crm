@@ -3,6 +3,7 @@ import {connect} from 'react-redux'
 import {Card,Input,Button,Form,Icon } from 'antd'
 import Grid from '../../common/Grid.jsx'
 import GrabRender from './grabRender.jsx'
+import * as actionCreator from "../../../actions/invoicing/inventory/inventory.js"
 export class ListBox extends React.Component {
     componentWillMount(){
         // this.props.refreshLisT()
@@ -44,6 +45,15 @@ export class ListBox extends React.Component {
             "record":"记录",
             "operation":"打款"
         }]
+        // var allData = this.props.formData
+        // const allData =this.props.formData
+        // console.log(allData)
+        // console.log(allData.length)
+        if(allData ==[]){
+            console.log(1)
+        }else{
+            console.log(2)
+        }
         return(
             <div>
                 <Grid
@@ -58,13 +68,16 @@ export class ListBox extends React.Component {
 }
 
 function mapStateToProps(state) {
+    console.log("这是数据")
+    // var allDatas = state.directionGrab.data.data
     return {
+        // formData:state.directionGrab.data.data
         // rowData: state.bankList.data,
     }
 }
 function mapDispatchToProps(dispatch) {
     return {
-
+        // getFlowList: () => dispatch(actionCreator.getFlowDataList()),
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(ListBox)

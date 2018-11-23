@@ -27,6 +27,13 @@ let styles={
 }
 
 class AddRuleModal extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            data:{},
+            dataLength:1
+        }
+    }
     componentWillMount(){
 
     }
@@ -37,52 +44,79 @@ class AddRuleModal extends React.Component {
        })
     }
      dataSort(obj){
-        console.log('aaa',obj)
+        console.log(obj)
+         let check =[];
          let arr=[]
-         for(let i in obj.steps){
-             arr.push(obj.steps[i])
+         var jsonObj =obj;
+         if(obj.length>0){
+              jsonObj = JSON.parse(jsonObj)
          }
-           console.log('bbb',arr)
+         for(let i in jsonObj){
+             arr.push(jsonObj[i])
+         }
          return arr.map((val, i)=> {
              if(i==0){
-                 return  <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click"><span style={styles.containers}>{val}</span></Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
+                 return  <Step key={i} title={ <Popover content={<MemberListModal checkId={i}/>}  trigger="click"><span style={styles.containers}>{val}</span></Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
 
              }else{
-                 return  <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click">{val}</Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
+                 return  <Step key={i} title={ <Popover content={<MemberListModal checkId={i}/>}  trigger="click">{val}</Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
 
              }
              // return  <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click"><span>{val}</span></Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
          })
      }
-    addOneStep(){
-       /*  console.log('data1',this.props.data.steps)
-       let len= Object.keys(this.props.data.steps).length
-        let isLen=0;
-        for(var i in this.props.data.steps){
-             if(this.props.data.steps[i]==''){
-               isLen+=1
-             }
-        }
-        if(isLen!=0){
-            return
-        }else{
 
-            this.props.data.steps[len+1]="选择人名"
-            this.props.updataModal(this.props.data)
-        }*/
-        this.addOne()
+    addOneStep(){
+        let arrList = this.props.data;
+        console.log(this.props.changeId)
+        console.log()
+        console.log(this.props.data)
+        console.log(this.props.data.length)
+        let  jsonObj={};
+        let arrS={}
+        if(arrList.length!=0){
+            jsonObj =  JSON.parse(this.props.data)
+        }else{
+            console.log("数据为空")
+        }
+        let arr = [];
+        for(let i in jsonObj){
+            arr.push(jsonObj[i])
+        }
+        let list = {
+            [arr.length+1]:"请选择"
+        }
+        arrS = Object.assign(jsonObj,list)
+        arrS = JSON.stringify(arrS)
+        this.props.updateModal(arrS)
+
     }
     addOne(){
-        return <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click">{val}</Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
+        return <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click">{val}</Popover>} icon={<Icon type="user" style={{display: "block"}}/>}/>
+        // return <Step key={i} title={ <Popover content={<MemberListModal/>}  trigger="click">{val}</Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>
+    }
+    checkData(){
+        let ruleId =this.props.ruleId;
+        let changeId =this.props.changeId;
+        let params ={
+            ruleId:ruleId,
+            step:changeId,
+        }
+        // this.props.putChangeList(params)
+        console.log("修改信息")
+        this.props.unVisible({
+            visible:false,
+            modalType:0
+        })
 
     }
     render() {
         const width=window.screen.avaiWidth>700 ? 400:"70%";
+        console.log(this.props.data)
         // const zhi='<Step  title={ <Popover content={<MemberListModal/>}  trigger="click">123</Popover>} icon={<Icon type="user" style={{display: "none"}}/>}/>'
-
         return (
             <Modal
-             title={this.props.modalType==0?"添加常规规则":"修改审批流通"}
+             title={this.props.modalType==0?"添加常规规则":"修改审批流程"}
              visible={this.props.visible}
              footer={null}
              onCancel={this.closeModal.bind(this)}
@@ -103,12 +137,11 @@ class AddRuleModal extends React.Component {
                 </div>
                 <div style={{textAlign:"center"}}>
                     <Button onClick={this.closeModal.bind(this)}>取消</Button>
-                    <Button className="mainButton" style={{marginLeft:"20px"}}>确定</Button>
+                    <Button className="mainButton" onClick={this.checkData.bind(this)} style={{marginLeft:"20px"}}>确定</Button>
                 </div>
                 <div>
                     <p>所有人名</p>
                     <div className="shadowBox">
-124
                     </div>
                 </div>
             </Modal>
@@ -116,18 +149,21 @@ class AddRuleModal extends React.Component {
     }
 }
 function mapStateToProps(state) {
-    console.log("aaa");
+    console.log(state.addRulesModal.changeFormData)
     return {
-        data:state.addRulesModal.data,
+        data:state.addRulesModal.changeFormData,
         visible:state.processAdminTop.visible,
-        modalType:state.processAdminTop.modalType
+        modalType:state.processAdminTop.modalType,
+        ruleId:state.getProcessAdminList.ruleId,
+        changeId:state.addRulesModal.idList,
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
       unVisible:(val)=>dispatch(actionCreater.showModal(val)),
-       updataModal:(val)=>dispatch(actionCreaterModal.getAddBranchModal(val))
+       updateModal:(val)=>dispatch(actionCreaterModal.updateBranchModal(val)),
+        putChangeList:(val)=>dispatch(actionCreaterModal.putChangeListData(val)),
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(AddRuleModal)

@@ -63,8 +63,12 @@ const rowItemLayout = {
 
 export class ModalFormContent extends React.Component {
     constructor(props) {
-        super(props);
+        super(props)
+        this.state = {
+            timeCheck:false,
+        }
     }
+
     makeOptions(options){
         if(options){
             let keys=Object.keys(options)
@@ -73,6 +77,43 @@ export class ModalFormContent extends React.Component {
                     {options[key]}
                 </Option>
             ))
+        }
+    }
+
+
+    makeListOptions(options){
+        if(options){
+            let keys=Object.keys(options)
+            return keys.map(key=>(
+                <Option value={this.check(key)} key={key}>
+                    {options[key]}
+                </Option>
+            ))
+        }
+    }
+
+    check(key) {
+        if(key == 0){
+            return 0
+        }else{
+           return String(this.props.positionDataList[key])
+        }
+    }
+    makeListsOptions(options){
+        if(options){
+            let keys=Object.keys(options)
+            return keys.map(key=>(
+                <Option value={this.checkLists(key)} key={key}>
+                    {options[key]}
+                </Option>
+            ))
+        }
+    }
+    checkLists(key) {
+        if(key == 0){
+            return 0
+        }else{
+            return String(this.props.BranchDataList[key])
         }
     }
     makeRoles(options){
@@ -110,15 +151,26 @@ export class ModalFormContent extends React.Component {
     }
     handleSubmit(e) {
         e.preventDefault();
-        let allData=this.props.data
-        allData.enter_time=exportDate(allData.enter_time)
+        let allData=this.props.data;
+        if(this.state.timeCheck){
+            allData.enter_time=exportDate(allData.enter_time)
+        }else{
+            allData.enter_time=Math.floor(allData.enter_time.valueOf())
+        }
+        let opations = this.makeRoles(this.props.rolesData)
+        let keys=Object.keys(opations)
+        keys.map(key=>{
+                if(opations[key]==allData.role_id){
+                    allData.role_id =key
+                }
+            }
+        )
         delete allData.undefined
         let data = allData;
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const modalType = this.props.modalType;
                 delete data.undefined
-                console.log("datadata",data)
                 String(modalType) == '0' ? this.editModal.call(this, data) : this.saveModal.call(this, data);
             }
         });
@@ -126,8 +178,15 @@ export class ModalFormContent extends React.Component {
 
     }
     saveModal(data) {
+        let dataList = data;
+        dataList.department_id =Number(dataList.department_id)
+        dataList.position_id=Number(dataList.position_id)
+        dataList.role_id=Number(dataList.role_id)
         function cb(res) {
             if (res.error_code === GLOBALSUCCESS) {
+                this.setState({
+                    timeCheck:false,
+                })
                 message.success("添加员工成功!")
                 this.props.clearForm()
                 this.props.initToPage();
@@ -144,14 +203,25 @@ export class ModalFormContent extends React.Component {
 
             }
         }
-        addMemberList(data, cb.bind(this))
+        addMemberList(dataList, cb.bind(this))
 
     }
-
+    changeTime(){
+        this.setState({
+            timeCheck:true,
+        })
+    }
     editModal(data) {
-        console.log('data',data)
+        console.log(data)
+        let dataList = data;
+        dataList.department_id =Number(dataList.department_id)
+        dataList.position_id=Number(dataList.position_id)
+        dataList.role_id=Number(dataList.role_id)
         function cb(res) {
             if (res.error_code === GLOBALSUCCESS) {
+                this.setState({
+                    timeCheck:false,
+                })
                 message.success("修改员工信息成功!")
                 this.props.clearForm()
                 this.props.initToPage();
@@ -167,13 +237,13 @@ export class ModalFormContent extends React.Component {
                 this.props.form.resetFields();
             }
         }
-        editMemberList({dataAll:data,employee_id:this.props.employeeId}, cb.bind(this))
+        console.log(dataList)
+        editMemberList({dataAll:dataList,employee_id:this.props.employeeId}, cb.bind(this))
     }
     render(){
         const {
             getFieldDecorator
         } = this.props.form;
-
         return(
                 <div >
                     <div className="shadowCard" style={{overflow:'hidden',padding:'20px 10px',border:'none'}}>
@@ -209,7 +279,7 @@ export class ModalFormContent extends React.Component {
                                     [{ required: true, message:  "请选择所属部门" }]
                                 }>
                                 <Select>
-                                    {this.makeOptions(this.props.BranchData)}
+                                    {this.makeListsOptions(this.props.BranchData)}
                                 </Select>
                             </FormItem>
                             <FormItem
@@ -221,7 +291,7 @@ export class ModalFormContent extends React.Component {
                                     [{ required: true, message: "请选择职位" }]
                                 }>
                                 <Select>
-                                    {this.makeOptions(this.props.positionData)}
+                                    {this.makeListOptions(this.props.positionData)}
                                 </Select>
                             </FormItem>
                             <FormItem
@@ -303,7 +373,7 @@ export class ModalFormContent extends React.Component {
                                 rules={
                                     [{ required: true, message:"请选择入职时间" }]
                                 }>
-                                <DatePicker />
+                                <DatePicker onChange={this.changeTime.bind(this)} />
                             </FormItem>
                             <FormItem
                                 getFieldDecorator={getFieldDecorator}
@@ -312,7 +382,7 @@ export class ModalFormContent extends React.Component {
                                 row
                                 label="密码"
                                 rules={
-                                    [{ required: true, message:"请输入密码"}]
+                                    [{ required: false, message:"请输入密码"}]
                                 }>
                                 <Input type='password'/>
                             </FormItem>
@@ -389,12 +459,15 @@ function onFieldsChange(props,changedFields){
 }
 
 function mapStateToProps(state){
+    console.log(state.modify.data)
     return {
         data:state.modify.data,
         modalType:state.modify.modalType,
-        BranchData:state.modify.developmentOptions,
+        BranchData:state.modify.developmentOptions.department,
+        BranchDataList:state.modify.developmentOptions.parent_id,
         rolesData:state.modify.roles,
-        positionData:state.modify.positionOptions,
+        positionData:state.modify.positionOptions.position,
+        positionDataList:state.modify.positionOptions.parent_id,
         api:state.modify.api,
         employeeId:state.modify.employeeId
         // bankData:state.bankType

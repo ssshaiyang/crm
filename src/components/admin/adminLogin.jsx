@@ -24,6 +24,9 @@ class AdminLogin extends React.Component {
         if(sessionStorage.getItem('adminLogedPass')){
             this.props.toShow(false)
             this.props.unVisible(false)
+        }else{
+            this.props.toShow(true)
+            this.props.unVisible(true)
         }
     }
 

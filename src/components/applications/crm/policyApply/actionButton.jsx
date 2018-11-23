@@ -79,9 +79,11 @@ export class SubmitModal extends React.Component{
 		const button = this.props.data.policy_apply_status == 0 ?
 					(<div><Button icon="edit" className="gridButton" onClick={this.edit.bind(this,policy_apply_id)}/>
 					<Button icon="to-top" className="gridButton"  onClick={this.push.bind(this,policy_apply_id)}/></div> )
-		: (<Button icon="select" className="gridButton" >
-			{/*<Link to={'/work/approval'}></Link>*/}
-			</Button>)
+		: (	<Link to={'/work/approval'}>
+				<Button icon="select" className="gridButton" ></Button>
+			</Link>
+
+			)
 		return (
 			<div>
 			{button}

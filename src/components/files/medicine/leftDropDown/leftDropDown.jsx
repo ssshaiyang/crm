@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Tag, DatePicker, message } from 'antd'
+import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Tag, DatePicker, message ,Radio } from 'antd'
 import * as actionCreator from "../../../../actions/files/medicineName/medicineName.js";
 
 import * as actionCreater from "../../../../actions/files/medicine/medicine.js";
@@ -10,6 +10,7 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 const MonthPicker = DatePicker.MonthPicker;
 const RangePicker = DatePicker.RangePicker;
+const RadioGroup = Radio.Group;
 
 const columns = [{
     title: '编号',
@@ -46,19 +47,25 @@ const columns_compony = [{
 
 const columns_BusinessCom = [{
     title: '编号',
-    dataIndex: 'billing_id',
-    key: 'billing_id',
+    dataIndex: 'deliver_id',
+    key: 'deliver_id',
 }, {
     title: '名称',
-    dataIndex: 'billing_name',
-    key: 'billing_name',
+    dataIndex: 'deliver_name',
+    key: 'deliver_name',
 }];
 
-const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-}
+const columns_agent = [{
+    title: '编号',
+    dataIndex: 'agent_id',
+    key: 'agent_id',
+}, {
+    title: '名称',
+    dataIndex: 'agent_name',
+    key: 'agent_name',
+}];
+
+
 
 export class LeftDropDown extends React.Component {
     constructor(props) {
@@ -67,6 +74,7 @@ export class LeftDropDown extends React.Component {
             showManufacturerVisible: false,
             filterDropdownVisible: false,
             showCompanyVisible: false,
+            showAgentVisible:false,
             filtered: false,
             selectedMoreValue: [],
             indeterminate: true,
@@ -84,21 +92,31 @@ export class LeftDropDown extends React.Component {
     }
 
     componentWillMount() {
-
+        this.props.getUserInfo(1);
     }
 
     componentDidUpdate() {
         if (this.props.addDrugInfoCode == 1000) {
             const data = {
-                page: -1,
-                limit: 10
+            page: 1,
+            limit: 5
             }
             this.props.getDrugList(data);
-            this.props.getUserInfo(1);
+            
         }
+
         console.log()
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugList(params);
+        }
+    }
     /**
      * 控制添加药品信息按钮
      */
@@ -137,8 +155,8 @@ export class LeftDropDown extends React.Component {
     getSearchValue(value) {
         let data = {
             filter: value,
-            page: -1,
-            limit: 10
+            page: 1,
+            limit: 5
         }
         this.props.searchDrugInfo(data)
     }
@@ -151,8 +169,8 @@ export class LeftDropDown extends React.Component {
     //显示生产厂家对话框
     showManufacturerInfo() {
         const data = {
-            page: -1,
-            limit: 10
+            page: 1,
+            limit: 5
         }
         this.props.getManufacturerList(data);
         this.setState({
@@ -173,11 +191,14 @@ export class LeftDropDown extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record,index) {
+        console.log(index)
         this.setState({
             manufacturer_name: record.manufacturer_name,
-            manufacturer_id : record.manufacturer_id
+            manufacturer_id : record.manufacturer_id,
+            rowclicked :index
         })
+        //rowclicked
         console.log(this.state.manufacturer_id)
     }
 
@@ -207,8 +228,48 @@ export class LeftDropDown extends React.Component {
         })
     }
 
+    /**
+     * 展现代理商弹框
+     */
+    showAgent() {
+        const data = {
+            page: -1,
+            limit: 10
+        }
+        this.props.getAgentList(data);
+        this.setState({
+            showAgentVisible: true
+        })
+    }
+
+    handleOkAgentInfo() {
+        this.setState({
+            showAgentVisible: false
+        })
+    }
+
+    handleCancelAgentNameInfo() {
+        this.setState({
+            showAgentVisible: false
+        })
+    }
+
+     //是否分销单选按钮
+    distribution(e) {
+        distributionValue: e.target.value
+    }
+
+    //是否停用
+    disabled(e) {
+        disabledValue: e.target.value
+    }
+
     //获取搜索值
     getCompanyInfoSearchValue(value) {
+
+    }
+
+    getAgentInfoSearchValue(value){
 
     }
 
@@ -221,7 +282,9 @@ export class LeftDropDown extends React.Component {
         e.preventDefault();
         console.log("aaskj")
         this.props.form.validateFields((err, values) => {
-            console.log(values)
+            console.log(values);
+            var companyuserid = sessionStorage.getItem('companyuserid');
+            console.log(companyuserid)
             if (!err) {
                 //console.log('aaaaaaaaa', values)
                 let params = {
@@ -229,34 +292,38 @@ export class LeftDropDown extends React.Component {
                     'base_price': values.base_price,
                     'bid_type': values.bid_type,
                     'business_license_code': values.business_license_code,
-                    'business_license_expire_time': values.business_license_expire_time,
+                    'business_license_expire_time': Math.round(Date.parse(values.business_license_expire_time ? values.business_license_expire_time._d : '')/1000) ,
                     'country_medicare_code': values.country_medicare_code,
                     'create_time': values.create_time,
                     'creater': values.creater,
                     'dosage': values.dosage,
                     'drug_deliver': values.drug_deliver,
                     'gmp_code': values.gmp_code,
-                    'gmp_expire_time': values.gmp_expire_time,
+                    'gmp_expire_time': Math.round(Date.parse(values.gmp_expire_time?values.gmp_expire_time._d:'')/1000) || '',
                     'if_disabled': values.if_disabled,
                     'if_distribution': values.if_distribution,
                     'invoice_price': values.invoice_price,
                     'other_price': values.other_price,
-                    'production_expire_time': values.production_expire_time,
+                    'production_expire_time': Math.round(Date.parse(values.production_expire_time?values.production_expire_time._d:'')/1000),
                     'production_license': values.production_license,
                     'protocol_region': values.protocol_region,
                     'province_medicare_code': values.province_medicare_code,
                     'proxy': values.proxy,
-                    'proxy_expire_time': values.proxy_expire_time,
+                    'proxy_expire_time':  Math.round(Date.parse(values.proxy_expire_time?values.proxy_expire_time._d:'')/1000),
                     'retail_price': values.retail_price,
                     'specification': values.specification,
                     'tax_price': values.tax_price,
+                    'bid_price':values.bid_price,
                     'unit': values.unit,
                     'manufacturer_id': this.state.manufacturer_id,
-                    'drug_billing': ['1'],
-                    'drug_deliver': ['1'],
-                    'drug_agent': ['1'],
+                    'manufacturer_name':this.state.manufacturer_name,
+                    'creator_id':companyuserid,
+                    'drug_remark':values.drug_remark,
+                    'drug_deliver':this.state.bussinessId,
+                    'drug_billing':this.state.billingId,
+                    'drug_agent':this.state.agentId
                 };
-                console.log(params)
+                console.log(params);
                 this.props.addDrugInfo(params)
             }
         });
@@ -463,22 +530,80 @@ export class LeftDropDown extends React.Component {
             }
         }
 
-        const business_rowSelection = {
+        const manufacturerRowSelection ={
+            
+        }
+
+        const billing_rowSelection = {
             onChange: (selectedRowKeys, selectedRows) => {
+
+                var billingName = '';
+                var billingId = [];
+                selectedRows.map(function(item) {
+                    console.log(item)
+                    billingName = billingName + '/' + item.billing_name + '  ';
+                    billingId.push(item.billing_id)
+                })
+                console.log(billingName)
                 this.setState({
-                    selectedBusinessInfoRows: selectedRows
+                    selectedBillingInfoRows: billingName,
+                    billingId:billingId
                 }, () => {
-                    this.getBusinessSelectedRowsValue();
+                    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
                 })
             },
         }
+
+        const business_rowSelection = {
+            onChange: (selectedRowKeys, selectedRows) => {
+                var bussinessName = '';
+                var bussinessId = [];
+                selectedRows.map(function(item){
+                    console.log(item)
+                    bussinessName = bussinessName + '/'+ item.deliver_name + '  ';
+                    bussinessId.push(item.deliver_id)
+                })
+                console.log(bussinessName)
+                this.setState({
+                    selectedBusinessInfoRows: bussinessName, 
+                    bussinessId:bussinessId
+                }, () => {
+                     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                })
+            },
+        }
+
+        const agent_rowSelection = {
+            onChange: (selectedRowKeys, selectedRows) => {
+                var agentName = '';
+                var agentId = [];
+                selectedRows.map(function(item){
+                    console.log(item)
+                    agentName = agentName + '/'+ item.agent_name + '  ';
+                    agentId.push(item.agent_id)
+                })
+                console.log(agentName)
+                this.setState({
+                    selectedAgentRows: agentName, 
+                    agentId:agentId
+                }, () => {
+                     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+                })
+            },
+        }
+
+        const antTableRowClick = {
+            backgroundColor:'red'
+        }
+
+
         return (
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
+                      {/*  <Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -611,6 +736,7 @@ export class LeftDropDown extends React.Component {
                                             showSearch
                                             style={{ width: 200 }}
                                             optionFilterProp="children"
+                                           
                                             onChange={this.handleChangeType.bind(this)}
                                         >
                                             <Option value="1">国家基药</Option>
@@ -704,7 +830,7 @@ export class LeftDropDown extends React.Component {
                                     {...formItemLayout}
                                     label="其他用费"
                                 >
-                                    {getFieldDecorator('other_price	', {
+                                    {getFieldDecorator('other_price', {
 
                                     })(
                                         <div>
@@ -719,15 +845,31 @@ export class LeftDropDown extends React.Component {
                         <div className='botLine'>
                             <FormItem
                                 {...formItemLayout1}
-                                label='开票公司'
+                                label='代理商'
                             >
-                                {getFieldDecorator(' drug_billing', {
+                                {getFieldDecorator('drug_agent', {
                                 })(
                                     <div className='addNodeInfo'>
                                         {/* {this.state.selectedValues ? this.state.selectedValues.map((value) => {
                                             <Tag>value</Tag>
                                         }) : <Tag></Tag>} */}
-                                        {this.state.selectedValues}
+                                        {this.state.selectedAgentRows}
+                                        <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
+                                            onClick={this.showAgent.bind(this)}><Icon type="plus-square" /></Button>
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout1}
+                                label='开票公司'
+                            >
+                                {getFieldDecorator('drug_billing', {
+                                })(
+                                    <div className='addNodeInfo'>
+                                        {/* {this.state.selectedValues ? this.state.selectedValues.map((value) => {
+                                            <Tag>value</Tag>
+                                        }) : <Tag></Tag>} */}
+                                        {this.state.selectedBillingInfoRows}
                                         <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
                                             onClick={this.showCompany.bind(this)}><Icon type="plus-square" /></Button>
                                     </div>
@@ -741,7 +883,7 @@ export class LeftDropDown extends React.Component {
 
                                 })(
                                     <div className='addNodeInfo'>
-                                        {this.state.selectedBusinessInfoValues}
+                                        {this.state.selectedBusinessInfoRows}
                                         <Button style={{ float: 'right', marginRight: 2 }} size='small' className='mainButton'
                                             onClick={this.showBusinessCompany.bind(this)}><Icon type="plus-square" /></Button>
                                     </div>
@@ -760,10 +902,10 @@ export class LeftDropDown extends React.Component {
                                         {getFieldDecorator('if_distribution', {
 
                                         })(
-                                            <div>
-                                                <label><input type="radio" name='radio1' value="1" checked />是 </label>
-                                                <label><input type="radio" name='radio1' value="2" />否 </label>
-                                            </div>
+                                            <RadioGroup onChange={this.distribution.bind(this)} initialValue={1}>
+                                                <Radio value={1}>是</Radio>
+                                                <Radio value={2}>否</Radio>
+                                            </RadioGroup>
                                             )}
                                     </FormItem>
                                 </Col>
@@ -776,10 +918,10 @@ export class LeftDropDown extends React.Component {
                                         {getFieldDecorator('if_disabled', {
 
                                         })(
-                                            <div>
-                                                <label><input type="radio" name='radio2' value="3" checked />是 </label>
-                                                <label><input type="radio" name='radio2' value='4' />否 </label>
-                                            </div>
+                                            <RadioGroup onChange={this.disabled.bind(this)} initialValue={1}>
+                                                <Radio value={1}>是</Radio>
+                                                <Radio value={2}>否</Radio>
+                                            </RadioGroup>
                                             )}
                                     </FormItem>
                                 </Col>
@@ -960,7 +1102,9 @@ export class LeftDropDown extends React.Component {
                                     {getFieldDecorator('create_time', {
 
                                     })(
-                                        <DatePicker style={{ width: 200 }} />
+                                        <div>
+                                            <p>{new Date().toLocaleDateString()}</p>
+                                        </div>
                                         )}
                                 </FormItem>
                             </Col>
@@ -996,7 +1140,27 @@ export class LeftDropDown extends React.Component {
                         onSearch={this.getMarkNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.manufacturerList.data} onRowClick={this.rowClick.bind(this)} />
+                    <Table 
+                    columns={columns}  rowKey
+                    dataSource={this.props.manufacturerList.data} 
+                    onRowClick={this.rowClick.bind(this)} 
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/>
+                </Modal>
+
+                <Modal
+                    title="代理商列表"
+                    visible={this.state.showAgentVisible}
+                    onOk={this.handleOkAgentInfo.bind(this)}
+                    onCancel={this.handleCancelAgentNameInfo.bind(this)}
+                >
+                    <Search
+                        placeholder="输入客户ID/姓名/联系方式"
+                        onSearch={this.getAgentInfoSearchValue.bind(this)}
+                        style={{ marginBottom: 10 }}
+                    />
+                    <Table rowSelection={agent_rowSelection} columns={columns_agent} 
+                    dataSource={this.props.agentList.data}
+                     />
                 </Modal>
 
                 <Modal
@@ -1010,7 +1174,9 @@ export class LeftDropDown extends React.Component {
                         onSearch={this.getCompanyInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowSelection={rowSelection} columns={columns_compony} dataSource={this.props.bilingListInfo.data} />
+                    <Table rowSelection={billing_rowSelection} columns={columns_compony} 
+                    dataSource={this.props.bilingListInfo.data} 
+                    />
                 </Modal>
 
                 <Modal
@@ -1024,7 +1190,9 @@ export class LeftDropDown extends React.Component {
                         onSearch={this.getCompanyInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table rowSelection={business_rowSelection} columns={columns_BusinessCom} dataSource={this.props.businessComInfo} />
+                    <Table rowSelection={business_rowSelection} columns={columns_BusinessCom} 
+                    dataSource={this.props.businessComInfo}
+                     />
                 </Modal>
             </div>
         )
@@ -1032,13 +1200,14 @@ export class LeftDropDown extends React.Component {
 }
 
 function mapStateToProps(state) {
-    console.log(state)
+    console.log(state.drugNameListInfo.userInfo)
     return {
         manufacturerList: state.drugListInfo.manufacturerList,
         bilingListInfo: state.drugListInfo.bilingListInfo,
         businessComInfo: state.drugListInfo.businessCom,
         addDrugInfoCode: state.drugListInfo.addDrugInfoCode,
-        userInfo: state.drugNameListInfo.userInfo
+        userInfo: state.drugNameListInfo.userInfo,
+        agentList:state.drugListInfo.agentInfo
     }
     console.log("aaaa")
 }
@@ -1055,10 +1224,13 @@ function mapDispatchToProps(dispatch) {
         getBillingComponyList: (param) => dispatch(actionCreater.getBillingComponyListInfo(param)),
         //获取商业公司信息
         getBusinessComList: (param) => dispatch(actionCreater.getBusinessComListinfo(param)),
+        //获取代理商信息
+        getAgentList:(param) => dispatch(actionCreater.getAgentInfo(param)),
         //添加药品信息123
         addDrugInfo: (param) => dispatch(actionCreater.addDrugFormInfo(param)),
         //获取用户信息
         getUserInfo: (param) => dispatch(actionCreator.getUser(param)),
+
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(LeftDropDown))

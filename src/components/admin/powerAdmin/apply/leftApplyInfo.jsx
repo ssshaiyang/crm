@@ -18,7 +18,7 @@ const columns = [{
 const data = [{
     key: '1',
     name: 'John Brown',
-    age: 32,
+    age: 888888,
     address: 'New York No. 1 Lake Park',
 }, {
     key: '2',
@@ -125,7 +125,7 @@ export class LeftApplyInfo extends React.Component {
             role_id: id
         }
         this.props.getRoleMember(role_info);
-        this.props.getRoleApply();
+        this.props.getRoleApply(role_info);
     }
 
     handleOkAddPower() {
@@ -236,8 +236,8 @@ function mapDispatchToProps(dispatch) {
     return {
         //获取角色的列表
         getPowerList: () => dispatch(actionCreator.getPowerListInfo()),
-        //获取所有应用信息
-        getRoleApply: () => dispatch(actionCreator.getRoleApplyList()),
+        //获取选中角色的应用信息
+        getRoleApply: (val) => dispatch(actionCreator.getRoleApplyList(val)),
         //获取成员信息
         getRoleMember: (val) => dispatch(actionCreator.getRoleMemberList(val))
     }

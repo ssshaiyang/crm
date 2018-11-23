@@ -61,6 +61,7 @@ export default class TopFilter extends React.Component {
 	}
 
 	changeRange(range) {
+		console.log(range)
 		this.props.initPagination()
 		this.props.onChange('range', range)
 		this.props.refresh({

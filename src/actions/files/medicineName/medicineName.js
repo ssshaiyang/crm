@@ -1,6 +1,7 @@
 import { getDrugNameListsInfo, getUserInfos, editClickedDrugNameInfo, delClickedDrugNameInfo, searchDrugNameInfos,
-    addDrugNameInfoLists, addManufacturerFormInfoLists
+    addDrugNameInfoLists, addManufacturerFormInfoLists,searchManufacturerInfoLists
 } from "../../../utils/interface.js"
+import {getAreaInfoLists} from "../../../utils/interface";
 
 //添加生产厂家
 export const addManufacturerFormInfo = function(params){
@@ -18,6 +19,25 @@ export const addManufacturerFormInfo = function(params){
             }
         }
         addManufacturerFormInfoLists(params,cb);
+    }
+}
+
+//添加生产厂家
+export const searchManufacturerFormInfo = function(params){
+    return(dispatch)=>{
+        function cb(res){
+            console.log("sssss")
+            if (res.error_code===GLOBALSUCCESS) {
+                let action = {
+                    type:"SEARCH_MANUFACTURER_INFO",
+                    payload:{
+                        data:res.data
+                    }
+                }
+                dispatch(action)
+            }
+        }
+        searchManufacturerInfoLists(params,cb);
     }
 }
 
@@ -132,5 +152,22 @@ export const addDrugNameInfoList = function (pramas = {}) {
             }
         }
         addDrugNameInfoLists(pramas, cb);
+    }
+}
+
+export const getAreaInfo = function () {
+    return (dispatch) => {
+        function cb(res) {
+            if (res.error_code === GLOBALSUCCESS) {
+                let action = {
+                    type: "GET_AREA_OTHER_INFO",
+                    payload: {
+                        data: res.data
+                    }
+                }
+                dispatch(action);
+            }
+        }
+        getAreaInfoLists(null, cb);
     }
 }

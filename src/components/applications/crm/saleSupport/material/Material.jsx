@@ -112,6 +112,8 @@ export default class Material extends React.Component {
 				})
 			}
 		}
+		console.log((params.range && params.range[0]))
+		console.log(this.state.filter.range[0])
 		let param = {
 			start_time: exportDate((params.range && params.range[0]) || this.state.filter.range[0]),
 			end_time: exportDate((params.range && params.range[1]) || this.state.filter.range[1]),
@@ -122,6 +124,7 @@ export default class Material extends React.Component {
 			page: params.page || this.state.pagination.page,
 			limit: params.limit || this.state.pagination.limit
 		}
+		console.log(param)
 		getMaterialsList(param, cb.bind(this))
 	}
 
@@ -187,9 +190,9 @@ export default class Material extends React.Component {
 				headerName: "序号",
 				valueGetter: (params) => params.node.rowIndex + 1
 			},
-			"approval_types": {
+			"approval_type": {
 				headerName: "审核类型",
-				valueGetter: (params) => ['我的申请', '待我审核', '我已审核'][params.data.approval_types - 1]
+				valueGetter: (params) => params.data.approval_type
 			},
 			"material_request_status": {
 				headerName: "状态",
@@ -216,7 +219,8 @@ export default class Material extends React.Component {
 					getDetail: this.getDetail.bind(this),
 					openModal:this.openModal.bind(this),
 					submit: pushMaterial,
-					getList: this.getMaterials.bind(this)
+					getList: this.getMaterials.bind(this),
+					over:this.over.bind(this)
 				}
 			}
 		}

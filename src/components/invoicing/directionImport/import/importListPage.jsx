@@ -2,7 +2,7 @@ import Pagination from '../../../common/Pagination.jsx'
 import {
     connect
 } from 'react-redux'
-// import * as actionCreater from "../../../../actions/capitalAdmin/accountAdmin/accountCenter/bankList.js"
+import * as actionCreater from "../../../../actions/capitalAdmin/accountAdmin/accountCenter/bankList.js"
 
 function mapStateToprops(state) {
     const pagination = state.bankList
@@ -17,7 +17,7 @@ function mapStateToprops(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        // onChange: (page, size) => dispatch(actionCreater.pageActionCreater(page, size))
+        onChange: (page, size) => dispatch(actionCreater.pageActionCreater(page, size))
     }
 }
 

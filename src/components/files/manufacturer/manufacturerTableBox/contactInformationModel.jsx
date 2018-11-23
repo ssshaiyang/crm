@@ -193,7 +193,7 @@ export class ContactInformationModel extends React.Component {
                                     }],
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_name} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_name} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -207,7 +207,7 @@ export class ContactInformationModel extends React.Component {
                                     }],
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_phone} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_phone} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -234,7 +234,7 @@ export class ContactInformationModel extends React.Component {
                                 {getFieldDecorator('manufacturer_contact_department', {
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.data.manufacturer_contact_department} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.data.manufacturer_contact_department} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -245,7 +245,7 @@ export class ContactInformationModel extends React.Component {
                                 {getFieldDecorator('manufacturer_contact_position', {
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_position} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_position} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -256,7 +256,7 @@ export class ContactInformationModel extends React.Component {
                                 {getFieldDecorator('manufacturer_contact_webchat', {
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_webchat} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_webchat} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -267,7 +267,7 @@ export class ContactInformationModel extends React.Component {
                                 {getFieldDecorator('manufacturer_contact_qq', {
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_qq} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_qq} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -278,7 +278,7 @@ export class ContactInformationModel extends React.Component {
                                 {getFieldDecorator('manufacturer_contact_email', {
                                 })(
                                     <div>
-                                        <Input defaultValue={this.props.contactInfo.manufacturer_contact_email} style={{ width: 200 }} />
+                                        <Input initialValue={this.props.contactInfo.manufacturer_contact_email} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>

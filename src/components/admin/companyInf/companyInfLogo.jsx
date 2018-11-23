@@ -72,12 +72,14 @@ export class CompanyLogo extends React.Component {
 
         function cb(res) {
             if (res.error_code === GLOBALSUCCESS) {
-                this.props.changeUrlImg(res.data.logo)
+                console.log(res)
+                console.log(res.data.company_logo);
+                this.props.changeUrlImg(res.data.company_logo)
                 message.success('修改头像成功')
                 this.cancel()
             }
         }
-        uploadCompanyLogo(this.state.uploadFile, cb.bind(this))
+        uploadCompanyLogo({company_logo: this.state.imgUrl,company_id:sessionStorage.getItem("company_id")}, cb.bind(this))
     }
 
     cancel() {
@@ -100,19 +102,27 @@ export class CompanyLogo extends React.Component {
             message.error('图片大小不可超过2M!');
             return false;
         }
-        this.setState({
-            uploadFile: file
-        })
+        return true;
     }
 
-    handleChange(file) {
+    handleChange(obj) {
         //去除红框
-console.log("file",file)
-        if (file.fileList.length > 1)
-            file.fileList[0].status = 'done'
         this.setState({
-            fileList: file.fileList
+            fileList:obj.fileList,
         })
+        if(obj.file.status =='done'){
+            console.log(obj);
+            this.setState({
+                imgUrl: obj.file.response.data,
+            })
+        }
+        return;
+// console.log("file",file)
+//         if (file.fileList.length > 1)
+//             file.fileList[0].status = 'done'
+//         this.setState({
+//             fileList: file.fileList
+//         })
     }
 
     render() {
@@ -128,9 +138,13 @@ console.log("file",file)
                     <Form onSubmit={this.handleSubmit.bind(this)}>
                         <FormItem>
                             <Upload.Dragger
-                                name="company_logo"
+                                name="file"
+                                action={GLOBALURL + '/uploads'}
                                 // action="/companies/logo"
-                                headers={{Authorization:localStorage.getItem('token') || sessionStorage.getItem('token')}}
+                                headers={{
+                                    Authorization:localStorage.getItem('eplustoken') || sessionStorage.getItem('eplustoken'),
+                                    "X-Requested-With": null,
+                                }}
                                 listType="picture-card"
                                 beforeUpload={this.beforeUpload.bind(this)}
                                 showUploadList={{showPreviewIcon:false}}

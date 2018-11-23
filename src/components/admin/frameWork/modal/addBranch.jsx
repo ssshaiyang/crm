@@ -56,6 +56,16 @@ export class frameWorkModal extends React.Component {
         });
     }
     makeOptions(options) {
+        if (options.department) {
+            let keys = Object.keys(options.department)
+            return keys.map(key => (
+                <Option value={options.parent_id[key]} key={key}>
+                    {options.department[key]}
+                </Option>
+            ))
+        }
+    }
+    makeListOptions(options) {
         if (options) {
             let keys = Object.keys(options)
             return keys.map(key => (
@@ -65,6 +75,7 @@ export class frameWorkModal extends React.Component {
             ))
         }
     }
+
     backLast() {
         this.props.closeModal(false)
     }
@@ -120,7 +131,7 @@ export class frameWorkModal extends React.Component {
                                     [{ required: false, message: ERROR.CUSTOMER_NAME_REQUIRED }]
                                 }>
                                 <Select>
-                                    {this.makeOptions(this.props.employee_select)}
+                                    {this.makeListOptions(this.props.employee_select)}
                                 </Select>
                             </FormItem>
                             <div style={{ textAlign: 'center', marginTop: '20px' }}>

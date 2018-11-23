@@ -6,6 +6,9 @@ export default function redeceName(state, action) {
         case 'GET_ALL_MANUFACTURER_INFO':
             newState.data = action.payload.data;
             break;
+        case 'SEARCH_MANUFACTURER_INFO':
+            newState.data = action.payload.data;
+            break;
         case 'GET_CONTACT_INFO':
             newState.contactInfo = action.payload.data;
             break;
@@ -23,6 +26,9 @@ export default function redeceName(state, action) {
             break;
         case 'DEL_MANU_INFO':
             newState.delManuCode = action.payload.data;
+            break;
+        case 'EDIT_MANU_INFO':
+            newState.editManuCode = action.payload.data;
             break;
     }
     return newState;

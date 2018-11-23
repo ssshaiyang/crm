@@ -87,7 +87,7 @@ export class RightApplyInfo extends React.Component {
         })
     }
 
-    //渲染当前角儿应用信息
+    //渲染当前角色应用信息
     showApplyList(data) {
         if (data.length > 0) {
             return data.map((item) => {
@@ -140,7 +140,7 @@ export class RightApplyInfo extends React.Component {
     render() {
         return (
             <div>
-                <Card id='leftPowerCard' title={"角色" + '[' + this.props.roleMember + ']名称'} extra={<Button size='small' className='mainButton'
+                <Card id='leftPowerCard' title={"角色" + '[' + this.props.roleMember + ']应用列表'} extra={<Button size='small' className='mainButton'
                     onClick={this.addApply.bind(this)}>添加应用</Button>}>
                     {this.showApplyList(this.props.roleApplyInfo)}
                 </Card>
@@ -169,7 +169,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         //添加人员
-        addMember: (id) => dispatch(actionCreator.addMemberList(id)),
+        addMember: (val) => dispatch(actionCreator.addMemberList(val)),
         //获取所有应用信息
         getRoleApply: () => dispatch(actionCreator.getRoleApplyList()),
     }

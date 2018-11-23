@@ -69,6 +69,17 @@ export class HospotalTop extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getHospital(params)
+            console.log("自动刷新")
+        }
+    }
+
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
@@ -130,6 +141,7 @@ export class HospotalTop extends React.Component {
             limit: 10
         }
         this.props.form.validateFields((err, values) => {
+            console.log(values)
             if (!err) {
                 let addHospital = {
                     hospital_name: values.hospital_name,
@@ -139,7 +151,8 @@ export class HospotalTop extends React.Component {
                     hospital_district: this.state.area[2],
                     hospital_address: values.hospital_address,
                     hospital_remark: values.hospital_remark,
-                    creator_name: this.props.userInfo.nickname
+                    creator_name: this.props.userInfo.nickname,
+                    create_time:values.create_time
                 }
                 this.props.addHospital(addHospital);
             }
@@ -229,9 +242,9 @@ export class HospotalTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -281,6 +294,7 @@ export class HospotalTop extends React.Component {
                                         rules: [{
                                             required: true
                                         }],
+
                                     })(
                                         <Select
                                             showSearch
@@ -388,7 +402,6 @@ export class HospotalTop extends React.Component {
 }
 
 function mapStateToProps(state) {
-    console.log('aaaaa',state.hospitalInfo.hospitalSelect)
     let areaList = [];
     if (state.corporationInfo.areaInfo) {
         areaList.push(state.corporationInfo.areaInfo);
@@ -400,6 +413,9 @@ function mapStateToProps(state) {
         areaInfo: areaList,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        addCode:state.hospitalInfo.addHospitalCode
+
+
     }
 }
 
@@ -417,6 +433,7 @@ function mapDispatchToProps(dispatch) {
         getHospital: (params) => dispatch(actionCreater.getHospitalInfo(params)),
         //删除医院信息
         delHospital: (params) => dispatch(actionCreater.delHospitalInfo(params)),
+
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(HospotalTop))

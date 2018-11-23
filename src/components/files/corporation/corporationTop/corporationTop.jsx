@@ -1,6 +1,6 @@
  import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio } from 'antd'
+import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio,Popconfirm } from 'antd'
 import * as actionCreater from "../../../../actions/files/corporation/corporation.js"
 import * as actionCreator from "../../../../actions/files/medicineName/medicineName.js";
 
@@ -37,6 +37,17 @@ export class CorportionTop extends React.Component {
     componentWillMount() {
 
     }
+
+     componentWillReceiveProps(nextProps){
+        if (nextProps.addContactCode == 1000 && this.props.addContactCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+                console.log("自动刷新")
+        }
+     }
 
     componentDidMount() {
         console.log(this.props.areaInfo);
@@ -99,6 +110,7 @@ export class CorportionTop extends React.Component {
                     deliver_province: this.state.area[0],
                     deliver_city: this.state.area[1],
                     deliver_district: this.state.area[2],
+                    'deliver_address':values.deliver_address,
                     deliver_url: values.deliver_url,
                     deliver_contact: this.state.addContactors,
                     deliver_accounts: this.state.addBankAccount,
@@ -113,10 +125,24 @@ export class CorportionTop extends React.Component {
                     proxy: values.proxy,
                     proxy_expire_time: values['proxy_expire_time'] ? Date.parse(values['proxy_expire_time'].format('YYYY-MM-DD')) / 1000 : '',
                     protocol_region: values.protocol_region,
-                    deliver_remark: values.deliver_remark
+                    deliver_remark: values.deliver_remark,
+                    creator_name: this.props.userInfo.nickname
                 }
                 this.props.addDeliverInfo(params)
             }
+            if (this.props.addContactCode == 1000) {
+                let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+             }
+             let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+            
         });
     }
 
@@ -149,9 +175,12 @@ export class CorportionTop extends React.Component {
     handleSubmitEditContactsInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
+            console.log(values)
+            console.log(err)
+            if (1) {
                 let editContactInfo = {
                     key: this.state.contactClickedInfo.key,
+                    deliver_contact_mobilephone:values.deliver_contact_mobilephone,
                     deliver_contact_name: values.deliver_contact_name,
                     deliver_contact_sex: values.deliver_contact_sex,
                     deliver_contact_department: values.deliver_contact_department,
@@ -177,7 +206,8 @@ export class CorportionTop extends React.Component {
     /**
      * 修改联系人信息
      */
-    updateManufacturerInfo() {
+    updateManufacturerInfo(record) {
+        console.log(record)
         this.setState({
             updateManuVisible: true,
         })
@@ -193,6 +223,16 @@ export class CorportionTop extends React.Component {
         this.setState({
             updateManuVisible: false
         })
+    }
+
+    delManufacturerInfo(key) {
+        const addContactors = [...this.state.addContactors];
+        this.setState({ 
+            addContactors: addContactors.filter(item => item.key !== key) 
+        });
+        // this.setState({
+        //     delManufacturerVisible: true
+        // })
     }
 
     /**
@@ -288,9 +328,10 @@ export class CorportionTop extends React.Component {
         this.props.form.validateFields((err, values) => {
             console.log(values);
             console.log(err);
-            if (!err) {
+            if (1==1) {
                 let addContactors = {
                     key: values.deliver_contact_phone,
+                    deliver_contact_telephone:values.deliver_contact_telephone,
                     deliver_contact_name: values.deliver_contact_name,
                     deliver_contact_phone: values.deliver_contact_phone,
                     deliver_contact_sex: this.state.addContactSex,
@@ -304,6 +345,7 @@ export class CorportionTop extends React.Component {
                 this.setState({
                     addContactors: addContactList
                 })
+                console.log("添加了联系人")
             }
         });
     }
@@ -313,7 +355,7 @@ export class CorportionTop extends React.Component {
         e.preventDefault();
         let addBankAccountList = this.state.addBankAccount;
         this.props.form.validateFields((err, values) => {
-            if (!err) {
+            if (1==1) {
                 let data = {
                     key: values.deliver_bank_account,
                     deliver_account_user: values.deliver_account_user,
@@ -367,7 +409,7 @@ export class CorportionTop extends React.Component {
     handleSubmitEditBankInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
+            if (1) {
                 let editBankInfo = {
                     key: this.state.clickedBankInfo.key,
                     deliver_bank_account: values.deliver_bank_account,
@@ -487,9 +529,9 @@ export class CorportionTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -653,6 +695,11 @@ export class CorportionTop extends React.Component {
                                     key="deliver_contact_name"
                                 />
                                 <Column
+                                    title="手机"
+                                    dataIndex="deliver_contact_telephone"
+                                    key="deliver_contact_telephone"
+                                />
+                                <Column
                                     title="性别"
                                     dataIndex="deliver_contact_sex"
                                     key="deliver_contact_sex"
@@ -690,11 +737,14 @@ export class CorportionTop extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text,record,index) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="delete" /></span>
+                                                onClick={() =>this.updateManufacturerInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delManufacturerInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>   
+                                            
                                         </div>
                                     )}
                                 />
@@ -1004,8 +1054,8 @@ export class CorportionTop extends React.Component {
                             <div style={{ marginBottom: 20 }}>
                                 <span style={{ marginLeft: 120 }}>性别:</span>
                                 <RadioGroup onChange={this.addContactSex.bind(this)} style={{ marginBottom: 20, marginLeft: 40 }}>
-                                    <Radio value={1}>是</Radio>
-                                    <Radio value={0}>否</Radio>
+                                    <Radio value={1}>男</Radio>
+                                    <Radio value={0}>女</Radio>
                                 </RadioGroup>
                             </div>
                             <FormItem
@@ -1274,7 +1324,7 @@ export class CorportionTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.deliver_bank_account : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1286,7 +1336,7 @@ export class CorportionTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.deliver_account_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1298,7 +1348,7 @@ export class CorportionTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.deliver_account_user : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1331,6 +1381,7 @@ function mapStateToProps(state) {
     if (state.corporationInfo.areaInfo) {
         areaList.push(state.corporationInfo.areaInfo);
     };
+    console.log(state.corporationInfo.addDeliverInfoCode)
     // var areaInfo = areaList[0];
     //     areaInfo.map((item)=>{})
     return {
@@ -1343,7 +1394,7 @@ function mapStateToProps(state) {
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
         //添加联系人成功code
-        addContactCode: state.corporationInfo.addContactCode
+        addContactCode: state.corporationInfo.addDeliverInfoCode
     }
 }
 

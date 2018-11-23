@@ -9,13 +9,15 @@ const Search = Input.Search;
 
 export class MedincineNameOperationModel extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             addMechInfoVisible: false,
             showMedicineNameVisible: false,
             searchText: '',
-            filtered: false
+            filtered: false,
+            drug_name:this.props.data.drug_name,
+            drug_id:this.props.data.drug_id
         }
     }
 
@@ -25,10 +27,29 @@ export class MedincineNameOperationModel extends React.Component {
             limit: 10
         }
         this.props.getDrugList(param);
+        this.setState({
+
+        })
     }
 
     componentDidMount() {
+    }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000 ) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugNameList(params)
+        }
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000 ) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugNameList(params)
+        }
     }
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
@@ -64,10 +85,12 @@ export class MedincineNameOperationModel extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record, index ) {
         //console.log('sssssss',record)
         this.setState({
-            name: record.drug_name
+            drug_name: record.drug_name,
+            drug_id:record.drug_id,
+            rowclicked :index
         })
     }
 
@@ -117,14 +140,17 @@ export class MedincineNameOperationModel extends React.Component {
             values.drug_id = this.state.id;
             values.creator_name = this.props.userInfo.username;
             values.create_time = timestamp;
+            console.log(values);
+            console.log(err)
             if (!err) {
                 let params = {
-                    drug_id: this.props.data.drug_id,
+                    drug_id: this.props.data.different_drug_id,
                     values: values
                 }
                 this.props.editDrugNameInfo(params);
-                this.props.getDrugNameList(data);
+                
             }
+            this.props.getDrugNameList(data);
         });
     }
 
@@ -133,13 +159,13 @@ export class MedincineNameOperationModel extends React.Component {
      */
 
     showDel() {
-        this.props.delDrugNameInfo(this.props.data.drug_id);
         this.setState({
             delAgentVisible: true
         })
     }
 
     handleOkDelAgent() {
+        this.props.delDrugNameInfo(this.props.data.different_drug_id);
         let data = {
             page: -1,
             limit: 10
@@ -160,7 +186,7 @@ export class MedincineNameOperationModel extends React.Component {
 
     handleCancelDelAgent() {
         this.setState({
-            agentModelVisible: false
+            delAgentVisible: false
         })
     }
 
@@ -238,8 +264,7 @@ export class MedincineNameOperationModel extends React.Component {
                                     })(
                                         <div>
                                             <Input style={{ width: 200 }}
-                                                defaultValue={this.props.data.drug_name}
-                                                value={this.state.name}
+                                                value={this.state.drug_name}
                                                 prefix={<span style={{ marginLeft: 170, cursor: 'pointer' }}
                                                     onClick={this.showMedicineNameInfo.bind(this)}><Icon type="edit" /></span>} />
                                         </div>
@@ -256,6 +281,7 @@ export class MedincineNameOperationModel extends React.Component {
                                         rules: [{
                                             required: true
                                         }],
+                                        initialValue:this.props.data.specification
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.specification} style={{ width: 200 }} />
@@ -273,6 +299,7 @@ export class MedincineNameOperationModel extends React.Component {
                                         rules: [{
                                             required: true
                                         }],
+                                        initialValue:this.props.data.different_drug_name
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.different_drug_name} style={{ width: 200 }} />
@@ -290,6 +317,7 @@ export class MedincineNameOperationModel extends React.Component {
                                         rules: [{
                                             required: true
                                         }],
+                                        initialValue:this.props.data.different_specification
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.different_specification} style={{ width: 200 }} />
@@ -307,10 +335,10 @@ export class MedincineNameOperationModel extends React.Component {
                                         label="创建人"
                                     >
                                         {getFieldDecorator('creator_name', {
-
+                                            initialValue:this.props.data.creator_name
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -335,10 +363,10 @@ export class MedincineNameOperationModel extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('different_drug_remark', {
-
+                                        initialValue:this.props.data.different_drug_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' value={this.props.data.different_drug_remark} />
+                                            <input type='textarea' defaultValue={this.props.data.different_drug_remark} className='my_textarea_style'  />
                                         </div>
                                         )}
                                 </FormItem>
@@ -364,7 +392,9 @@ export class MedincineNameOperationModel extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.drugsListInfo.data} onRowClick={this.rowClick.bind(this)} />;
+                    <Table columns={columns} dataSource={this.props.drugsListInfo.data} 
+                    onRowClick={this.rowClick.bind(this)}  rowKey
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />;
             </Modal>
 
                 <Modal
@@ -373,24 +403,24 @@ export class MedincineNameOperationModel extends React.Component {
                     onOk={this.handleOkDelAgent.bind(this)}
                     onCancel={this.handleCancelDelAgent.bind(this)}
                 >
-                    <span>确定要删除此人的信息吗?</span>
+                    <span>确定要删除此条的信息吗?</span>
                 </Modal>
-            </div >
+            </div>
         )
     }
 }
 function mapStateToProps(state) {
-    //console.log('ssss', state.drugNameListInfo.editDrugNameCode)
     return {
         //visible: state.inventory.checkOutVisible
         userInfo: state.drugNameListInfo.userInfo,
         editCode: state.drugNameListInfo.editDrugNameCode,
+        delCode:state.drugNameListInfo.delDrugNameCode,
         delDrugNameCode: state.drugNameListInfo.delDrugNameCode,
         //获取药品信息
-        drugsListInfo: state.drugListInfo.data,
+        drugsListInfo: state.drugListInfo.drugList,
     }
 }
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch){
     return {
         //获取药品列表
         getDrugList: (params) => dispatch(actionCreator.getDrugListInfo(params)),

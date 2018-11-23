@@ -21,9 +21,21 @@ export class AddedDrugsPanel extends React.Component {
         super(props);
     }
     saveGetApi(){
-
+        let checkId = this.props.checkId;
+        let changeData =this.props.changeData;
+        let changeFormData =this.props.changeFormData;
+        let idList = this.props.idList
+        let params ={
+            idList:idList,
+            checkId:checkId,
+            changeData:changeData,
+            changeFormData:changeFormData,
+        }
+        console.log(params)
+        this.props.changeDataList(params)
     }
     handleChange(e){
+        console.log(e.target.value)
         this.props.setValueFilter(e.target.value);
         this.props.initPage(1,5)
         this.props.filterGetList({
@@ -62,7 +74,10 @@ export class AddedDrugsPanel extends React.Component {
 function mapStateToProps(state) {
     return {
         selectedApi:state.addRulesModal.api,
-        filter:state.addRulesModal.filter
+        filter:state.addRulesModal.filter,
+        changeData:state.addRulesModal.changeData,
+        changeFormData:state.addRulesModal.changeFormData,
+        idList:state.addRulesModal.idList
     }
 }
 
@@ -70,7 +85,8 @@ function mapDispatchToProps(dispatch) {
     return {
         setValueFilter:(val)=>dispatch(actionCreater.getValue(val)),
         filterGetList:(val)=>dispatch(actionCreaterModal.memberList(val)),
-        initPage:(page,size)=>dispatch(actionCreaterModal.getAddBranchModalPage(page,size))
+        initPage:(page,size)=>dispatch(actionCreaterModal.getAddBranchModalPage(page,size)),
+        changeDataList:(val)=>dispatch(actionCreaterModal.changeDataList(val)),
     }
 }
 

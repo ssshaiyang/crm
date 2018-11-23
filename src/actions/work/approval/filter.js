@@ -8,6 +8,7 @@
 'use strict';
 
 export const changeFilterStatusActionCreater = function(status) {
+	console.log(status);
 	return ({
 		type: 'APPROVAL_FILTER_CHANGE_FILTER_STATE',
 		payload: {

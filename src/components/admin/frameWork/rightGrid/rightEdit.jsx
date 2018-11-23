@@ -27,6 +27,7 @@ import * as actionCreator from "../../../../actions/admin/frameWork/rightGrid/ri
 const Option=Select.Option;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
+import {formatDate,exportDate} from '../../../../utils/common.js'
 import {addMemberList,editMemberList} from "../../../../utils/interface.js"
 import * as actionCreatorList from "../../../../actions/admin/frameWork/rightGrid/rightList.js"
 import * as initPageAction from "../../../../actions/admin/frameWork/rightGrid/rightPage.js"
@@ -77,6 +78,9 @@ const rowItemLayout = {
 export class Render extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            timeCheck:false,
+        }
     }
     makeOptions(options){
         if(options){
@@ -86,6 +90,41 @@ export class Render extends React.Component {
                     {options[key]}
                 </Option>
             ))
+        }
+    }
+    makeListOptions(options){
+        if(options){
+            let keys=Object.keys(options)
+            return keys.map(key=>(
+                <Option value={this.check(key)} key={key}>
+                    {options[key]}
+                </Option>
+            ))
+        }
+    }
+
+    check(key) {
+        if(key == 0){
+            return 0
+        }else{
+            return String(this.props.positionDataList[key])
+        }
+    }
+    makeListsOptions(options){
+        if(options){
+            let keys=Object.keys(options)
+            return keys.map(key=>(
+                <Option value={this.checkLists(key)} key={key}>
+                    {options[key]}
+                </Option>
+            ))
+        }
+    }
+    checkLists(key) {
+        if(key == 0){
+            return 0
+        }else{
+            return String(this.props.BranchDataList[key])
         }
     }
     makeRoles(options){
@@ -107,10 +146,10 @@ export class Render extends React.Component {
         return result
     }
     componentWillMount(){
-        const modalType=this.props.modalType
-        this.props.getPositionList()
-        this.props.getBranchList()
-        this.props.getRoleList()
+        // const modalType=this.props.modalType
+        // this.props.getPositionList()
+        // this.props.getBranchList()
+        // this.props.getRoleList()
 
     }
     backlast(){
@@ -118,9 +157,30 @@ export class Render extends React.Component {
         this.props.closeModal(false)
 
     }
+
+    changeTime(){
+        this.setState({
+            timeCheck:true,
+        })
+    }
     handleSubmit(e) {
         e.preventDefault();
         let data = this.props.data;
+        let opations = this.makeRoles(this.props.rolesData)
+        let keys=Object.keys(opations)
+        keys.map(key=>{
+                if(opations[key]==data.role_id){
+                    data.role_id =key
+                }
+            }
+        )
+        if(this.state.timeCheck){
+            data.enter_time=exportDate(data.enter_time)
+        }else{
+            console.log(122)
+            data.enter_time=Math.floor(data.enter_time.valueOf())
+        }
+        data.role_id=Number(data.role_id)
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 this.props.initToPage()
@@ -135,6 +195,9 @@ export class Render extends React.Component {
     editModal(data) {
         function cb(res) {
             if (res.error_code === GLOBALSUCCESS) {
+                this.setState({
+                    timeCheck:false,
+                })
                 message.success("修改员工信息成功!")
                 this.props.closeModal(false);
             }
@@ -143,6 +206,9 @@ export class Render extends React.Component {
 
     }
     render(){
+        let i =0;
+        i++;
+        console.log(i)
         const width=window.screen.avaiWidth>700 ? 400:"70%";
         const {
             getFieldDecorator
@@ -184,31 +250,31 @@ export class Render extends React.Component {
                                 <FormItem
                                     getFieldDecorator={getFieldDecorator}
                                     col={24}
-                                    itemName="department"
+                                    itemName="department_id"
                                     label="所属部门"
                                     rules={
                                         [{ required: true, message: ERROR.CUSTMOER_TYPE_REQUIRED }]
                                     }>
                                     <Select>
-                                        {this.makeOptions(this.props.BranchData)}
+                                        {this.makeListsOptions(this.props.BranchData)}
                                     </Select>
                                 </FormItem>
                                 <FormItem
                                     getFieldDecorator={getFieldDecorator}
                                     col={24}
-                                    itemName="position"
+                                    itemName="position_id"
                                     label="职位"
                                     rules={
                                         [{ required: true, message: ERROR.CUSTMOER_TYPE_REQUIRED }]
                                     }>
                                     <Select>
-                                        {this.makeOptions(this.props.positionData)}
+                                        {this.makeListOptions(this.props.positionData)}
                                     </Select>
                                 </FormItem>
                                 <FormItem
                                     getFieldDecorator={getFieldDecorator}
                                     col={24}
-                                    itemName="role"
+                                    itemName="role_id"
                                     label="角色"
                                     rules={
                                         [{ required: true, message: ERROR.CUSTMOER_TYPE_REQUIRED }]
@@ -285,14 +351,14 @@ export class Render extends React.Component {
                                     rules={
                                         [{ required: true, message: ERROR.CUSTOMER_NAME_REQUIRED }]
                                     }>
-                                    <DatePicker />
+                                    <DatePicker onChange={this.changeTime.bind(this)}/>
                                 </FormItem>
                                 <FormItem
                                     getFieldDecorator={getFieldDecorator}
                                     col={24}
                                     itemName="update_time"
                                     row
-                                    label="最后登录时间"
+                                    label="最后更新时间"
                                     rules={
                                         [{ required: true, message: ERROR.CUSTOMER_NAME_REQUIRED }]
                                     }>
@@ -353,6 +419,7 @@ const rightBtnModalForm =Form.create({
     mapPropsToFields
 })(Render)
 
+
 function mapPropsToFields(props) {
 //映射到表单
     let fields={};
@@ -383,12 +450,15 @@ function onFieldsChange(props,changedFields){
 }
 
 function mapStateToProps(state) {
+    console.log(state.frameWorkRightBth.roles)
     return {
         visible:state.frameWorkRightBth.modifyModal,
         data:state.frameWorkRightBth.data,
-        BranchData:state.frameWorkRightBth.developmentOptions,
+        BranchData:state.frameWorkRightBth.developmentOptions.department,
+        BranchDataList:state.frameWorkRightBth.developmentOptions.parent_id,
         rolesData:state.frameWorkRightBth.roles,
-        positionData:state.frameWorkRightBth.positionOptions,
+        positionData:state.frameWorkRightBth.positionOptions.position,
+        positionDataList:state.frameWorkRightBth.positionOptions.parent_id,
         employeeId:state.frameWorkRightBth.employeeId
     }
 }

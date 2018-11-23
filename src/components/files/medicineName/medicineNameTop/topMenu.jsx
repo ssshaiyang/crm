@@ -35,6 +35,16 @@ export class TopMenu extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps){
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000 ) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDrugNameList(params)
+        }
+     }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
         let data = {
@@ -86,11 +96,12 @@ export class TopMenu extends React.Component {
     }
 
     //获取表格的行元素
-    rowDrugNameClick(record) {
+    rowDrugNameClick(record , index) {
         //console.log('aaaaaaaa', record)
         this.setState({
             name: record.drug_name,
-            id: record.drug_id
+            id: record.drug_id,
+            rowclicked :index
         })
     }
 
@@ -133,14 +144,21 @@ export class TopMenu extends React.Component {
         let timestamp = Date.parse(new Date());
         timestamp = timestamp / 1000;
         this.props.form.validateFields((err, values) => {
-            console.log(values)
+            console.log(values);
+            console.log(err);
             if (!err) {
                 values.drug_id = this.state.id;
                 values.creator_name = this.props.userInfo.nickname;
                 values.create_time = timestamp;
                 this.props.addDrugNameInfo(values);
             }
+            let data = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDrugNameList(data);
         });
+       
     }
 
     handleMenuClick(e) {
@@ -246,9 +264,9 @@ export class TopMenu extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
+                        {/*<Dropdown overlay={menu} trigger={['hover']} onVisibleChange={this.handleVisibleChange.bind(this)} visible={this.state.visible}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -408,7 +426,8 @@ export class TopMenu extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.drugsListInfo.data} onRowClick={this.rowDrugNameClick.bind(this)} />;
+                    <Table columns={columns} dataSource={this.props.drugsListInfo.data} rowKey onRowClick={this.rowDrugNameClick.bind(this)} 
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />;
                 </Modal>
             </div>
         )
@@ -420,6 +439,7 @@ function mapStateToProps(state) {
         userInfo: state.drugNameListInfo.userInfo,
         //获取药品信息
         drugsListInfo: state.drugListInfo.drugList,
+        addCode:state.drugListInfo.addManuCode,
     }
 }
 
@@ -431,7 +451,8 @@ function mapDispatchToProps(dispatch) {
         //获取用户信息
         getUserInfo: (param) => dispatch(actionCreater.getUser(param)),
         //添加药品异名信息
-        addDrugNameInfo: (param) => dispatch(actionCreater.addDrugNameInfoList(param))
+        addDrugNameInfo: (param) => dispatch(actionCreater.addDrugNameInfoList(param)),
+        getDrugNameList: (params) => dispatch(actionCreater.getDrugNameListInfo(params)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(TopMenu))

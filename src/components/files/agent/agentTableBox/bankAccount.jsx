@@ -11,7 +11,6 @@ export class BankAccount extends React.Component {
     constructor() {
         super();
         this.state = {
-            addAgentVisible: false,
             addBankInfoVisible: false,
             detailInfoVisible:false
         }
@@ -36,28 +35,37 @@ export class BankAccount extends React.Component {
      */
     addAgent() {
         this.setState({
-            addAgentVisible: true
+            addBankInfoVisible: true
         })
     }
 
     handleOkAddAgent() {
         this.setState({
-            addAgentVisible: false
+            addBankInfoVisible: false
         })
     }
 
-    handleCancelAddAgent() {
+    handleCancelAddBankInfo() {
         this.setState({
-            addAgentVisible: false
+            addBankInfoVisible: false
         })
     }
 
-    handleSubmitContactsInfo(e) {
+    handleSubmitBankInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, fieldsValue) => {
-            if (err) {
-                return;
+            console.log(err)
+            if (!err) {
+                let id = this.props.data.agent_id;
+                let params = {
+                    id: id,
+                    values: fieldsValue
+                }
+                this.props.addBank(params);
+                console.log("aaaa")
             }
+            
+
         });
     }
 
@@ -69,6 +77,8 @@ export class BankAccount extends React.Component {
         this.setState({
             detailInfoVisible: true
         })
+        const id = this.props.data.agent_id;
+        this.props.getBank(id)
     }
 
     handleOkDetailInfo() {
@@ -131,19 +141,20 @@ export class BankAccount extends React.Component {
             <div>
                 <a onClick={this.addAgent.bind(this)}>添加</a>|<a onClick={this.showDetail.bind(this)}>查看详情</a>
                 <Modal
-                    title="添加代理商"
-                    visible={this.state.addAgentVisible}
-                    onOk={this.handleOkAddAgent.bind(this)}
-                    onCancel={this.handleCancelAddAgent.bind(this)}
+                    title="添加银行账户"
+                    visible={this.state.addBankInfoVisible}
+                    onOk={null}
+                    onCancel={null}
+                    footer={null}
                 >
-                    <Form onSubmit={this.handleSubmitContactsInfo.bind(this)}>
+                    <Form onSubmit={this.handleSubmitBankInfo.bind(this)}>
                         {/* 第一层 */}
                         <div className='botLine'>
                             <FormItem
                                 {...formItemLayout}
                                 label="账号"
                             >
-                                {getFieldDecorator('account_number', {
+                                {getFieldDecorator('agent_bank_account', {
                                     rules: [{
                                         required: true
                                     }],
@@ -157,7 +168,7 @@ export class BankAccount extends React.Component {
                                 {...formItemLayout}
                                 label="开户行"
                             >
-                                {getFieldDecorator('deposit_bank', {
+                                {getFieldDecorator('agent_account_name', {
                                     rules: [{
                                         required: true
                                     }],
@@ -171,7 +182,7 @@ export class BankAccount extends React.Component {
                                 {...formItemLayout}
                                 label="开户名"
                             >
-                                {getFieldDecorator('deposit_name', {
+                                {getFieldDecorator('agent_account_user', {
                                     rules: [{
                                         required: true
                                     }],
@@ -181,20 +192,16 @@ export class BankAccount extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <FormItem
-                                {...formItemLayout}
-                                label="银行类型"
-                            >
-                                {getFieldDecorator('bank_type', {
-                                    rules: [{
-                                        required: true, message: '请输入你的银行类型',
-                                    }],
-                                })(
-                                    <div>
-                                        <Input style={{ width: 200 }} />
-                                    </div>
-                                    )}
-                            </FormItem>
+
+                            <div>
+                                <Button type="primary" htmlType="submit" className="login-form-button" style={{ marginTop: 10, marginLeft: 350, marginRight: 10 }}
+                                onClick={this.handleOkAddAgent.bind(this)}>
+                                确定
+                                </Button>
+                                <Button type="primary" className="login-form-button" onClick={this.handleCancelAddBankInfo.bind(this)}>
+                                    退出
+                                </Button>
+                            </div>
                         </div>
                     </Form>
                 </Modal>
@@ -212,10 +219,9 @@ export class BankAccount extends React.Component {
     }
 }
 function mapStateToProps(state) {
-  
     return {
         //visible: state.inventory.checkOutVisible
-        bankdata: state.agentInfo.data.data
+        bankdata: state.agentInfo.bankInfo
 
     }
     console.log(bankdata)
@@ -225,6 +231,9 @@ function mapDispatchToProps(dispatch) {
          //获取代理商列表
         getAgent: (params) => dispatch(actionCreator.getAgentInfo(params)),
         //openModalBox: (val) => dispatch(actionCreater.checkOutActionCreater(val))
+        getBank: (params) => dispatch(actionCreator.getAgentBank(params)),
+        addBank:(params) => dispatch(actionCreator.addAgentBank(params))
+
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(BankAccount))

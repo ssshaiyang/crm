@@ -245,7 +245,7 @@ export const rePolicy = function(params, cb) {
 	// cb({
 	// 	"error_code": 1000
 	// });
-	put('/policies/again/' + params.policy_apply_id, param, cb)
+	put('/policies/again/' + params.policy_apply_id, params, cb)
 }
 
 //物料申请接口
@@ -410,7 +410,7 @@ export const pushMaterial = function(id, cb) {
 	// 	"error_code": 1000,
 	// 	"data": true
 	// });
-	post('/materials/submit', params, null, cb)
+	post('/materials/submit', params, cb)
 }
 
 /**
@@ -453,7 +453,7 @@ export const editMaterial = function(params, cb) {
 	// 	apply_description: params.apply_description
 	// }
 	// console.log('edit', param, params.material_apply_id);
-	put('/materials/' + params.material_apply_id, param, cb)
+	put('/materials/' + params.material_apply_id, params, cb)
 }
 
 /**
@@ -634,13 +634,16 @@ export const getMeetingDetail = function(params, cb) {
  * @param  {Function} cb     [description]
  * @return {[type]}          [description]
  */
-export const pushMeeting = function(params, cb) {
+export const pushMeeting = function(id, cb) {
 	// cb({
 	// 	"error_code": 1000,
 	// 	"data": true
 	// })
 	// console.log(params);
-	post('/meetings/submit',params, null, cb)
+	let params = {
+        meeting_apply_id : id
+	}
+	post('/meetings/submit',params, cb)
 }
 
 /**

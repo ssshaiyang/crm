@@ -80,7 +80,7 @@ export const editManufacturerInfoLists = function (params, cb) {
     //     "error_code": 1000,
     //     "data": true
     //   }, false, params);
-    put('/differentManufacturer/'+params.manufacturer_id, params.value, cb);
+    put('/differentManufacturer/'+params.id, params.value, cb);
 }
 
 //删除异名厂家信息

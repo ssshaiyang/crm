@@ -34,7 +34,6 @@ export const getFrameWorkmemberList=function(params = {}){
             department_id :-1,
             position_id:-1
         }
-        console.log('params1',selfParams)
         getEmployees(selfParams, cb)
     }
 }

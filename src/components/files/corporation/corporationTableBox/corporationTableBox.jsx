@@ -45,11 +45,7 @@ export class CorporationTableBox extends React.Component {
                 field: 'if_grab',
                 width: 120,
             },
-            {
-                headerName: "商业公司链接",
-                field: 'deliver_url ',
-                width: 150,
-            },
+            
             {
                 headerName: "登录账号",
                 field: 'deliver_account',

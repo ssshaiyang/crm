@@ -77,16 +77,20 @@ const rowItemLayout = {
 export class Render extends React.Component {
     constructor(props) {
         super(props);
+        this.state={
+            data:[],
+        }
     }
+
     componentWillMount(){
-
-
+        console.log(this.props.data);
     }
 
     handleSubmit(e) {
         e.preventDefault();
         let data = this.props.data;
         this.props.form.validateFields((err, values) => {
+            console.log(err)
             if (!err) {
                 delete data.company_logo;
                 delete data.undefined
@@ -98,6 +102,7 @@ export class Render extends React.Component {
 
     editModal(data) {
         function cb(res) {
+            console.log(res);
             if (res.error_code === GLOBALSUCCESS) {
                 message.success("保存信息成功!")
             }
@@ -188,17 +193,17 @@ export class Render extends React.Component {
                                     }>
                                     <Input/>
                                 </FormItem>
-                               {/* <FormItem
-                                    getFieldDecorator={getFieldDecorator}
-                                    col={24}
-                                    itemName="company_website"
-                                    row
-                                    label="官网"
-                                    rules={
-                                        [{ required: true, message:"请输入官网" }]
-                                    }>
-                                    <Input/>
-                                </FormItem>*/}
+                               {/*{ <FormItem*/}
+                                    {/*getFieldDecorator={getFieldDecorator}*/}
+                                    {/*col={0}*/}
+                                    {/*itemName="company_website"*/}
+                                    {/*row*/}
+                                    {/*label="官网"*/}
+                                    {/*rules={*/}
+                                        {/*[{ required: true, message:"请输入官网" }]*/}
+                                    {/*}>*/}
+                                    {/*<Input/>*/}
+                                {/*</FormItem>}*/}
                                 <div style={{textAlign:'center',marginTop:'20px'}}>
                                     <Button className="mainButton" htmlType="submit" style={{marginLeft:'30px'}} >保存</Button>
                                 </div>

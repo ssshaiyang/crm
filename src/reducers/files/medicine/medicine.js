@@ -27,8 +27,11 @@ export default function redeceName(state, action) {
         case 'GET_BUSINESS_INFO':
             newState.businessCom = action.payload.data;
             break;
+        case 'MEDICINE_GET_AGENT_INFO':
+            newState.agentInfo = action.payload.data;
+            break;
         case 'SEARCH_DRUG_INFO':
-            newState.searchDrugInfo = action.payload.data;
+            newState.drugList = action.payload.data;
             break;
         case 'ADD_DRUG_INFO':
             newState.addDrugInfoCode = action.payload.data;
@@ -48,6 +51,19 @@ export default function redeceName(state, action) {
         case 'GET_AGENT_INFO':
             newState.agentInfo = action.payload.data;
             break;
+        case 'MEDICINE_PAGINATION_CHANGE_PAGE':
+            newState.page = action.payload.page;
+            newState.limit = action.payload.limit;
+            break;
+        case 'MEDICINE_PAGINATION_INIT':
+            newState.limit = 5;
+            newState.page = 1;
+            newState.totalCount = 0;
+            break;
+        case 'MEDICINE_PAGINATION_SET_TOTALCOUNT':
+            newState.totalCount = action.payload.totalCount;
+            break;
     }
+    // console.log(newState)
     return newState;
 }

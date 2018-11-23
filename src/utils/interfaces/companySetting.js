@@ -32,7 +32,7 @@ export const getEmploeeDeatil = function(params, cb) {
 	// 		"address": "adress"
 	// 	}
 	// });
-	get('/employees/1', params, cb);
+	get('/employees/'+sessionStorage.getItem("companyuserid"), params, cb);
 }
 
 export const modifyEmploeePassword = function(params, cb) {

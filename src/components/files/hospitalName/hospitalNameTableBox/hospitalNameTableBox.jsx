@@ -15,6 +15,7 @@ export class HospitalNameTableBox extends React.Component {
     }
 
     componentWillMount() {
+        console.log(this.props.data)
         let params = {
             page: -1,
             limit: 10

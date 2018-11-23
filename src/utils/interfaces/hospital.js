@@ -47,3 +47,13 @@ export const getHospitalAddress = function(params, cb) {
 	// 	})
 	get('/hospitals/' + params.hospital_id, null, cb)
 }
+
+export const getHospitalAddresOptions = function(params, cb) {
+    // cb({
+    // 		"error_code": 1000,
+    // 		"data": {
+    // 			"hospital_address": "浙江省杭州市西湖区文一路" + Math.floor(Math.random() * 10) + "号"
+    // 		}
+    // 	})
+    get('/hospitals/addressList', null, cb)
+}

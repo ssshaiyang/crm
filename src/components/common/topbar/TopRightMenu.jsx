@@ -7,6 +7,12 @@
 
 'use strict';
 import React from 'react'
+import {get,
+    post,
+    put,
+    del,
+    uploadFile
+} from '../../../utils/interfaces/setup.js'
 import {
 	Menu,
 	Dropdown,
@@ -40,7 +46,7 @@ export class TopRightMenu extends React.Component {
 				<Dropdown overlay={<Overlay logout={this.props.companyLogOut}/>} placement="bottomCenter">
 					<div style={{display:'flex',alignItems:'center'}}>
 						<Avatar shape="square" size="large" icon="user"/>
-						<p style={{marginLeft:'2px'}}>张晓美</p>
+						<p style={{marginLeft:'2px'}}>{sessionStorage.getItem('nickname')||localStorage.getItem('nickname')}</p>
 						<Icon type="caret-down"/>
 					</div>
 				</Dropdown>
@@ -95,6 +101,14 @@ class CompanyDropDownMenu extends React.Component {
 		switch (key) {
 			case 'outLogin':
 				sessionStorage.removeItem('epluscompanyName');
+				sessionStorage.removeItem("adminLogedPass");
+                var company_id = sessionStorage.getItem("company_id");
+                function cb(res){
+                    if (res.error_code === GLOBALSUCCESS) {
+                        console.log(111)
+					}
+                }
+                get('/companies/logout?company_id='+company_id,null,cb)
 				this.props.logout();
 				break;
 		}

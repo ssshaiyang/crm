@@ -1,8 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio  } from 'antd'
+import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio ,Popconfirm } from 'antd'
+import moment from 'moment';
 // import * as actionCreator from "../../../../actions/files/manufacturer/manufacturer.js";
 import * as actionCreater from "../../../../actions/files/medicineName/medicineName.js";
+import * as actionCreator from "../../../../actions/files/manufacturer/manufacturer.js";
 const CheckboxGroup = Checkbox.Group;
 const { Column, ColumnGroup } = Table;
 const Search = Input.Search;
@@ -127,12 +129,16 @@ export class ManufacturerTopMenu extends React.Component {
             manufacturer_province:'11',
             manufacturer_city:'00',
             manufacturer_district:'00',
-            sexValue:1
+            sexValue:1,
+            addContactorCount:0,
+            addConpamyCount:0
+
         }
     }
 
     componentWillMount() {
         this.props.getUserInfo(1);//获取创建人
+        this.props.getArea();
         console.log(this.props.userInfo)
         // if (this.props.userInfo.length==0) {
         //     userInfo = []
@@ -143,9 +149,25 @@ export class ManufacturerTopMenu extends React.Component {
          console.log(this.props.userInfo)
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getManufacturerInfo(params)
+            console.log("自动刷新")
+        }
+    }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
-        //console.log('ssss', value)
+       let data = {
+            filter: value,
+            page: -1,
+            limit: 10
+        }
+        this.props.searchManufacturerInfo(data);
     }
 
     /**
@@ -182,14 +204,53 @@ export class ManufacturerTopMenu extends React.Component {
             name: record.name
         })
     }
-    addressOnChange(e) {
-        console.log(e);
-        console.log((e[0]+e[1]+e[2]))
+
+    //获取选中银行账号信息
+    rowClickBankInfo(record) {
         this.setState({
-            manufacturer_province:e[0],
-            manufacturer_city:e[1],
-            manufacturer_district:e[2]
-        })    
+            clickedBankInfo: record
+        })
+    }
+
+
+    /**
+     * 编辑银行信息
+     */
+    editBankInfo() {
+        this.setState({
+            editBankInfoVisible: true
+        })
+    }
+
+        //编辑银行账户
+    handleSubmitEditBankInfo(e) {
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            if (1) {
+                let editBankInfo = {
+                    key: this.state.clickedBankInfo.key,
+                    manufacturer_bank_account: values.manufacturer_bank_account,
+                    manufacturer_account_name: values.manufacturer_account_name,
+                    manufacturer_account_user: values.manufacturer_account_user
+                }
+                let bankAccountInfo = this.state.addBankAccount;
+                for (let i = 0; i < bankAccountInfo.length; i++) {
+                    if (bankAccountInfo[i].key == editBankInfo.key) {
+                        bankAccountInfo[i] = editBankInfo
+                    }
+                }
+                this.setState({
+                    addBankAccount: bankAccountInfo,
+                })
+                console.log("编辑银行账户")
+            }
+        });
+    }
+    selectArea(value) {
+        this.setState({
+            area: value
+        })
+        console.log(value)
     }
     //选择性别
     sexOnChange(e){
@@ -214,49 +275,42 @@ export class ManufacturerTopMenu extends React.Component {
         console.log("aaaaa")
         e.preventDefault();
         this.props.form.validateFields((err, fieldsValue) => {
-            console.log(err)
+            console.log(fieldsValue)
             if (1==1) {
                 let params = {
-                    "manufacturer_contact":[{
-                        "manufacturer_contact_qq":fieldsValue.manufacturer_contact_qq,
-                        "manufacturer_contact_department":fieldsValue.manufacturer_contact_department,
-                        "manufacturer_contact_position":fieldsValue.manufacturer_contact_position,
-                        "manufacturer_contact_email":fieldsValue.manufacturer_contact_email,
-                        "manufacturer_contact_name":fieldsValue.manufacturer_contact_name,
-                        "manufacturer_contact_sex":fieldsValue.manufacturer_contact_sex,
-                        "manufacturer_contact_phone":fieldsValue.manufacturer_contact_phone,
-                        "manufacturer_contact_webchat":fieldsValue.manufacturer_contact_webchat,
-                        }],
-                    "manufacturer_account":[{
-                        "manufacturer_bank_account":fieldsValue.manufacturer_bank_account,
-                        "manufacturer_account_name":fieldsValue.manufacturer_account_name,
-                        "manufacturer_account_user":fieldsValue.manufacturer_account_user
-                        }],
+                    "manufacturer_contact":this.state.addContactors,
+                    "manufacturer_account":this.state.addBankAccount,
                     "business_license_code":fieldsValue.business_license_code,
-                    "business_license_expire_time":fieldsValue.business_license_expire_time,
+                    "business_license_expire_time":Date.parse(fieldsValue['business_license_expire_time'].format('YYYY-MM-DD')) / 1000,
                     "contact_information":fieldsValue.contact_information,
                     "corporate_bank_account":fieldsValue.corporate_bank_account,
                     "creator_name":this.props.userInfo,
                     "create_time":fieldsValue.create_time,
                     "gmp_code":fieldsValue.gmp_code,
-                    "gmp_expire_time":fieldsValue.gmp_expire_time,
+                    "gmp_expire_time":Date.parse(fieldsValue['gmp_expire_time'].format('YYYY-MM-DD')) / 1000,
                     "manufacturerId":fieldsValue.manufacturerId,
                     "manufacturer_address":fieldsValue.manufacturer_address,
-                    "manufacturer_province":this.state.manufacturer_province,
-                    "manufacturer_city":this.state.manufacturer_city,
-                    "manufacturer_district":this.state.manufacturer_district,
+                    "manufacturer_province":this.state.area[0],
+                    "manufacturer_city":this.state.area[1],
+                    "manufacturer_district":this.state.area[2],
                     "manufacturer_name":fieldsValue.manufacturer_name,
                     "manufacturer_remark":fieldsValue.manufacturer_remark,
-                    "production_expire_time":fieldsValue.production_expire_time,
+                    "production_expire_time":Date.parse(fieldsValue['production_expire_time'].format('YYYY-MM-DD')) / 1000,
                     "production_license":fieldsValue.production_license,
                     "protocol_region":fieldsValue.protocol_region,
                     "proxy":fieldsValue.proxy,
-                    "proxy_expire_time":fieldsValue.proxy_expire_time,
+                    "proxy_expire_time":Date.parse(fieldsValue['proxy_expire_time'].format('YYYY-MM-DD')) / 1000,
 
                 };
                 this.props.addManufacturerInfo(params);
-                console.log(params);    
+                console.log(params);  
+              
             }
+            let data = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getManufacturerInfo(data) 
         });
     }
 
@@ -285,11 +339,34 @@ export class ManufacturerTopMenu extends React.Component {
         //console.log('ssssss',value)
     }
 
-    handleSubmitContactsInfo(e) {
+
+    //编辑联系人
+    handleSubmitEditContactsInfo(e) {
         e.preventDefault();
-        this.props.form.validateFields((err, fieldsValue) => {
-            if (err) {
-                return;
+        this.props.form.validateFields((err, values) => {
+            console.log(values)
+            console.log(err)
+            if (1) {
+                let editContactInfo = {
+                    key: this.state.contactClickedInfo.key,
+                    manufacturer_contact_name:values.manufacturer_contact_name,
+                    manufacturer_contact_phone: values.manufacturer_contact_phone,
+                    manufacturer_contact_sex: values.manufacturer_contact_sex,
+                    manufacturer_contact_department: values.manufacturer_contact_department,
+                    manufacturer_contact_position: values.manufacturer_contact_position,
+                    manufacturer_contact_webchat: values.manufacturer_contact_webchat,
+                    manufacturer_contact_qq: values.manufacturer_contact_qq,
+                    manufacturer_contact_email: values.manufacturer_contact_email,
+                }
+                let contactorInfo = this.state.addContactors;
+                for (let i = 0; i < contactorInfo.length; i++) {
+                    if (contactorInfo[i].key == editContactInfo.key) {
+                        contactorInfo[i] = editContactInfo
+                    }
+                }
+                this.setState({
+                    addContactors: contactorInfo,
+                })
             }
         });
     }
@@ -303,7 +380,7 @@ export class ManufacturerTopMenu extends React.Component {
             console.log(err);
             if (1==1) {
                 let addContactors = {
-                    key: values.deliver_contact_phone,
+                    key: this.state.addContactorCount,
                     manufacturer_contact_name: values.manufacturer_contact_name,
                     manufacturer_contact_phone: values.manufacturer_contact_phone,
                     manufacturer_contact_sex: this.state.sexValue,
@@ -315,23 +392,37 @@ export class ManufacturerTopMenu extends React.Component {
                 }
                 addContactList.push(addContactors);
                 this.setState({
-                    addContactors: addContactList
+                    addContactors: addContactList,
+                    addContactorCount: this.state.addContactorCount + 1
                 })
                 console.log("执行练添加联系人");
             }
         });
         console.log(this.state.addContactors)
-    }
+    };
 
 
     /**
      * 修改联系人信息
      */
-    updateManufacturerInfo() {
+    updateManufacturerInfo (record){
+        console.log(record);
+        this.props.form.setFieldsValue({
+            edit_manufacturer_contact_department:record.manufacturer_contact_department,
+            edit_manufacturer_contact_email:record.manufacturer_contact_email,
+            edit_manufacturer_contact_name:record.manufacturer_contact_name,
+            edit_manufacturer_contact_phone:record.manufacturer_contact_phone,
+            edit_manufacturer_contact_position:record.manufacturer_contact_position,
+            edit_manufacturer_contact_qq:record.manufacturer_contact_qq,
+            edit_manufacturer_contact_sex:record.manufacturer_contact_sex,
+            edit_manufacturer_contact_webchat:record.manufacturer_contact_webchat,
+        })
         this.setState({
             updateManuVisible: true,
+            edit_manufacturer:record
+
         })
-    }
+    };
 
     rowClickContactInfo(record) {
         this.setState({
@@ -340,6 +431,7 @@ export class ManufacturerTopMenu extends React.Component {
     }
 
     handleOkManufacturerInfo() {
+
         this.setState({
             updateManuVisible: false
         })
@@ -355,13 +447,18 @@ export class ManufacturerTopMenu extends React.Component {
      * 删除用户信息
      */
 
-    delManufacturerInfo() {
-        this.setState({
-            delManufacturerVisible: true
-        })
+    delManufacturerInfo(key) {
+        const addContactors = [...this.state.addContactors];
+        this.setState({ 
+            addContactors: addContactors.filter(item => item.key !== key) 
+        });
+        // this.setState({
+        //     delManufacturerVisible: true
+        // })
     }
 
-    handleOkDelManufacturerInfo() {
+    handleOkDelManufacturerInfo(record) {
+        console.log(record);
         this.setState({
             delManufacturerVisible: false
         })
@@ -394,6 +491,25 @@ export class ManufacturerTopMenu extends React.Component {
         })
     }
 
+    handleOkEditBankInfo() {
+        this.setState({
+            editBankInfoVisible: false
+        })
+    }
+
+    handleCancelEditBankInfo() {
+        this.setState({
+            editBankInfoVisible: false
+        })
+    }
+    //删除公司账户
+    delCompanyInfo(key) {
+        const addBankAccount = [...this.state.addBankAccount];
+        this.setState({ 
+            addBankAccount: addBankAccount.filter(item => item.key !== key) 
+        });
+    }
+
      handleSubmitAddBankInfo(e) {
         e.preventDefault();
         console.log("qweewqeqw")
@@ -401,18 +517,21 @@ export class ManufacturerTopMenu extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (1==1) {
                 let data = {
+                    key: this.state.addConpamyCount,
                     manufacturer_account_name: values.manufacturer_account_name,
                     manufacturer_account_user: values.manufacturer_account_user,
                     manufacturer_bank_account: values.manufacturer_bank_account
                 }
                 addBankAccountList.push(data);
                 this.setState({
-                    addBankAccount: addBankAccountList
+                    addBankAccount: addBankAccountList,
+                    addConpamyCount:this.state.addConpamyCount + 1
                 })
                 console.log("qweewqeqw")
             }
         });
     }
+
     render() {
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
@@ -489,9 +608,9 @@ export class ManufacturerTopMenu extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -559,7 +678,7 @@ export class ManufacturerTopMenu extends React.Component {
 
                                     })(
                                         <div>
-                                            <Cascader options={options} onChange={this.addressOnChange.bind(this)} placeholder="请选择所属地区" style={{ width: 300 }} />
+                                            <Cascader defaultValue={[[330000,330100,330101]]} options={this.props.areaInfo} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" style={{ width: 300 }} />
                                         </div>
                                         )}
                                 </FormItem>
@@ -579,10 +698,10 @@ export class ManufacturerTopMenu extends React.Component {
                                     <div style={{ fontSize: 18, color: '#01d9b8', marginLeft: 15, cursor: 'pointer' }}
                                         onClick={this.showContactsModel.bind(this)}>
                                         <Icon type="plus-circle" />
-                                    </div>
+                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.state.addContactors ? this.state.addContactors : []} bordered={true} onRowClick={this.rowClickContactInfo.bind(this)}>
+                            <Table dataSource={this.state.addContactors ? this.state.addContactors : []} bordered={true} onRowClick={this.rowClickContactInfo.bind(this)} rowKey={record => record.index}>
                                 <Column
                                     title="姓名"
                                     dataIndex="manufacturer_contact_name"
@@ -626,11 +745,14 @@ export class ManufacturerTopMenu extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text, record, index) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="file-excel" /></span>
+                                                onClick={() =>this.updateManufacturerInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delManufacturerInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>   
+                                            
                                         </div>
                                     )}
                                 />
@@ -643,7 +765,7 @@ export class ManufacturerTopMenu extends React.Component {
                                 {...formItemLayout1}
                                 label="公司银行账户"
                             >
-                                {getFieldDecorator('corporate_bank_account ', {
+                                {getFieldDecorator('corporate_bank_account', {
 
                                 })(
                                     <div style={{ fontSize: 18, color: '#01d9b8', marginLeft: 15, cursor: 'pointer' }}
@@ -652,7 +774,7 @@ export class ManufacturerTopMenu extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.state.addBankAccount ? this.state.addBankAccount : []} rowKey={record => record.keyId}>
+                            <Table dataSource={this.state.addBankAccount ? this.state.addBankAccount : []} onRowClick={this.rowClickBankInfo.bind(this)} rowKey={record => record.keyId}>
                                 <Column
                                     title="开户行"
                                     dataIndex="manufacturer_account_name"
@@ -671,10 +793,12 @@ export class ManufacturerTopMenu extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text, record, index) => (
                                         <div>
-                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }}><Icon type="file-excel" /></span>
+                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }} onClick={this.editBankInfo.bind(this)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delCompanyInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>                                        
                                         </div>
                                     )}
                                 />
@@ -870,11 +994,11 @@ export class ManufacturerTopMenu extends React.Component {
                     onCancel={this.handleCancelAddContactsInfo.bind(this)}
                     onOk={this.handleOkAddContactsInfo.bind(this)}
                 >
-                    <Search
+                    {/*<Search
                         placeholder="输入客户ID/姓名/联系方式"
                         onSearch={this.getContactsInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
-                    />
+                    />*/}
                     <Form onSubmit={this.handleSubmitAddContactsInfo.bind(this)}>
                         {/* 第一层 */}
                         <div className='botLine'>
@@ -916,7 +1040,7 @@ export class ManufacturerTopMenu extends React.Component {
                             >
                                 {getFieldDecorator('manufacturer_contact_sex', {
                                 })(
-                                     <RadioGroup onChange={this.sexOnChange.bind(this)} value={this.state.sexValue}>
+                                     <RadioGroup onChange={this.sexOnChange.bind(this)}>
                                         <Radio value={1}>男</Radio>
                                         <Radio value={2}>女</Radio>
                                         
@@ -993,8 +1117,9 @@ export class ManufacturerTopMenu extends React.Component {
                 <Modal
                     title='修改联系人信息'
                     visible={this.state.updateManuVisible}
-                    onOk={this.handleOkManufacturerInfo.bind(this)}
-                    onCancel={this.handleCancelManufacturerInfo.bind(this)}
+                    
+                     footer={null}
+                    closable={false}
                     okText='保存'
                 >
                     {/* <Search
@@ -1002,7 +1127,7 @@ export class ManufacturerTopMenu extends React.Component {
                         onSearch={this.getContactsInfoSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     /> */}
-                    <Form onSubmit={this.handleSubmitContactsInfo.bind(this)}>
+                    <Form onSubmit={this.handleSubmitEditContactsInfo.bind(this)}>
                         {/* 第一层 */}
                         <div className='botLine'>
                             <FormItem
@@ -1013,9 +1138,10 @@ export class ManufacturerTopMenu extends React.Component {
                                     rules: [{
                                         required: true, message: '请输入你的姓名',
                                     }],
+                                    //initialValue:this.state.edit_manufacturer?this.state.edit_manufacturer.manufacturer_contact_name:''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1027,9 +1153,10 @@ export class ManufacturerTopMenu extends React.Component {
                                     rules: [{
                                         required: true, message: '请输入你的电话',
                                     }],
+                                    //initialValue:this.state.edit_manufacturer.manufacturer_contact_phone
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_phone : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1042,11 +1169,12 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="性别"
                             >
                                 {getFieldDecorator('manufacturer_contact_sex', {
+                                    //initialValue:this.state.manufacturer_contact_sex
                                 })(
-                                    <div>
-                                        <label><input type="radio" name='radio1' value="1" checked />男 </label>
-                                        <label><input type="radio" name='radio1' value="2" />女 </label>
-                                    </div>
+                                    <RadioGroup onChange={this.sexOnChange.bind(this)} >
+                                        <Radio value={1}>男</Radio>
+                                        <Radio value={2}>女</Radio>
+                                    </RadioGroup>
                                     )}
                             </FormItem>
                             <FormItem
@@ -1054,9 +1182,10 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="部门"
                             >
                                 {getFieldDecorator('manufacturer_contact_department', {
+                                   // initialValue:this.state.edit_manufacturer.manufacturer_contact_department
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_department : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1065,9 +1194,10 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="职务"
                             >
                                 {getFieldDecorator('manufacturer_contact_position', {
+                                   // initialValue:this.state.edit_manufacturer.manufacturer_contact_position
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_position : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1076,9 +1206,10 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="微信"
                             >
                                 {getFieldDecorator('manufacturer_contact_webchat', {
+                                   // initialValue:this.state.edit_manufacturer.manufacturer_contact_webchat
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_webchat : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1087,9 +1218,10 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="QQ"
                             >
                                 {getFieldDecorator('manufacturer_contact_qq', {
+                                   // initialValue:this.state.edit_manufacturer.manufacturer_contact_qq
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_qq : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1098,14 +1230,22 @@ export class ManufacturerTopMenu extends React.Component {
                                 label="邮箱"
                             >
                                 {getFieldDecorator('manufacturer_contact_email', {
+                                   // initialValue:this.state.edit_manufacturer.manufacturer_contact_email
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.manufacturer_contact_email : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
                         </div>
                         <br />
+                        <Button type="primary" htmlType="submit" className="login-form-button" style={{ marginTop: 10, marginLeft: 350, marginRight: 10 }}
+                            onClick={this.handleOkManufacturerInfo.bind(this)}>
+                            确定
+                        </Button>
+                        <Button type="primary" className="login-form-button" onClick={this.handleCancelManufacturerInfo.bind(this)}>
+                            退出
+                    </Button>
                     </Form>
                 </Modal>
                 <Modal
@@ -1136,7 +1276,7 @@ export class ManufacturerTopMenu extends React.Component {
                                     }],
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_bank_account : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1150,7 +1290,7 @@ export class ManufacturerTopMenu extends React.Component {
                                     }],
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_account_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1164,7 +1304,7 @@ export class ManufacturerTopMenu extends React.Component {
                                     }],
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_account_user : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1179,15 +1319,71 @@ export class ManufacturerTopMenu extends React.Component {
                         </div>
                     </Form>
                 </Modal>
+                 <Modal
+                    title='修改银行账户'
+                    visible={this.state.editBankInfoVisible}
+                    footer={null}
+                    closable={false}
+                >
+                    <Form onSubmit={this.handleSubmitEditBankInfo.bind(this)}>
+                        {/* 第一层 */}
+                        <div className='botLine'>
+                            <FormItem
+                                {...formItemLayout}
+                                label="账号"
+                            >
+                                {getFieldDecorator('manufacturer_bank_account', {
+
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_bank_account : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="开户行"
+                            >
+                                {getFieldDecorator('manufacturer_account_name', {
+
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_account_name : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="开户名"
+                            >
+                                {getFieldDecorator('manufacturer_account_user', {
+
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.manufacturer_account_user : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                        </div>
+                        <Button type="primary" htmlType="submit" className="login-form-button" style={{ marginTop: 10, marginLeft: 350, marginRight: 10 }}
+                            onClick={this.handleOkEditBankInfo.bind(this)}>
+                            确定
+                        </Button>
+                        <Button type="primary" className="login-form-button" onClick={this.handleCancelEditBankInfo.bind(this)}>
+                            退出
+                        </Button>
+                    </Form>
+                </Modal>
             </div>
         )
     }
 }
 
 function mapStateToProps(state) {
-    console.log(state.drugNameListInfo.userInfo.nickname);
     return {
-        userInfo: state.drugNameListInfo.userInfo.nickname
+        userInfo: state.drugNameListInfo.userInfo.nickname,
+        areaInfo:state.global.areaInfo,
+        // addCode:state.
     }
     console.log("userInfo")
 }
@@ -1196,8 +1392,12 @@ function mapDispatchToProps(dispatch) {
     return {
         //获取用户信息123
         getUserInfo: (param) => dispatch(actionCreater.getUser(param)),
+        //获取所属地区
+        getArea: () => dispatch(actionCreater.getAreaInfo()),
         //添加生产厂家
-        addManufacturerInfo: (params) => dispatch(actionCreater.addManufacturerFormInfo(params))
+        addManufacturerInfo: (params) => dispatch(actionCreater.addManufacturerFormInfo(params)),
+        searchManufacturerInfo: (params) => dispatch(actionCreater.searchManufacturerFormInfo(params)),
+        getManufacturerInfo: (param) => dispatch(actionCreator.getManufacturerListInfo(param)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(ManufacturerTopMenu))

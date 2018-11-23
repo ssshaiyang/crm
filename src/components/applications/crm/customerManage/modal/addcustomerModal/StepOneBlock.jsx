@@ -61,7 +61,8 @@ export class StepOne extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			hospitalName: ''
+			hospitalName: '',
+			hospital_address:''
 		}
 	}
 
@@ -77,8 +78,13 @@ export class StepOne extends React.Component {
 	componentWillMount() {
 		const modalType = this.props.modalType
 		this.props.getHospitalOptions(null, modalType === 1);
+		this.props.getHospitalAddressOptions();
 		// this.props.getHospitalDepartmentOptions();
 		modalType === 0 && this.initCreaterModal.call(this)
+	}
+
+	componentWillReceiveProps(nextProps){
+	
 	}
 
 	initCreaterModal() {
@@ -93,11 +99,20 @@ export class StepOne extends React.Component {
 		// this.props.getHospitalDepartmentOptions(value);
 		this.props.getHospitalAddress(value);
 		console.log(value)
-		console.log(this.props.datas.hospital_address)
+		const hospitalAddress = this.props.hospitalAddressOptions[value];
+		console.log(hospitalAddress)
+		
+		this.setState({
+			hospital_address: hospitalAddress
+		}, () => {
+			console.log(this.state.hospital_address)
+		});
 		this.props.form.setFieldsValue({
-			'hospital_address': this.props.datas.hospital_address
+			hospital_address:hospitalAddress
+		},() => {
+			console.log(this.state.hospital_address)
 		})
-		console.log(this.props.datas.hospital_address)  
+		console.log(this.state.hospital_address)
 	}
 
 	onSearchHospital(e) {
@@ -224,9 +239,10 @@ export class StepOne extends React.Component {
 							        </Col>
 								</Form.Item>
 							</Col>
+							<Col span={12}>
 							<FormItem 
 								getFieldDecorator={getFieldDecorator}
-								col={12}
+								
 								itemName="hospital_department"
 								label="所属科室"
 								rules={
@@ -237,6 +253,7 @@ export class StepOne extends React.Component {
 									</Select>*/}
 									<Input/>
 							</FormItem>
+							</Col>
 							<Col span={11} offset={1}>
 								<Form.Item>
 						          	{getFieldDecorator('department_leader', {
@@ -249,13 +266,15 @@ export class StepOne extends React.Component {
 							<FormItem 
 								getFieldDecorator={getFieldDecorator}
 								col={24}
-								itemName="hospital_address"
-								value={this.props.datas.hospital_address}
+								itemName="hospital_address"	
+								value={this.state.hospital_address}
 								label="医院地址"
 								rules={
-									[{ required: true, message: ERROR.HOSPITAL_ADDRESS_REQUIRED }]
+									[{ required: true, message: ERROR.HOSPITAL_ADDRESS_REQUIRED,
+									 }]
+
 								}>
-									<Input disabled></Input>
+									<Input disabled ></Input>
 							</FormItem>
 
 				        </Row>
@@ -326,8 +345,6 @@ const StepOneWithForm = Form.create({
 })(StepOne)
 
 function mapStateToProps(state) {
-	console.log(state.addCustomerModal.data)
-	console.log(state.addCustomerModal.data.hospital_address)
 	return {
 		//0为添加用户,1为修改用户
 		modalType: state.addCustomerModal.modalType,
@@ -335,7 +352,8 @@ function mapStateToProps(state) {
 		customerPhaseOptions: state.customerListFilter.customerPhaseOptions,
 		datas: state.addCustomerModal.data,
 		hospitalOptions: state.addCustomerModal.hospitalOptions,
-		hospitalDepartmentOptions: state.addCustomerModal.hospitalDepartmentOptions
+		hospitalDepartmentOptions: state.addCustomerModal.hospitalDepartmentOptions,
+		hospitalAddressOptions:state.addCustomerModal.hospitalAddressOptions
 	}
 }
 
@@ -345,7 +363,8 @@ function mapDispatchToProps(dispatch) {
 		getHospitalOptions: (hospital_name, cb) => dispatch(actionCreater.getHospitalOptionsActionCreater(hospital_name, cb)),
 		// getHospitalDepartmentOptions: (hospital_id) => dispatch(actionCreater.getHospitalDepartmentOptionsActionCreater(hospital_id)),
 		getHospitalAddress: (hospital_id) => dispatch(actionCreater.getHospitalAddressActionCreater(hospital_id)),
-		selectfirstListItem: (itemName, options) => dispatch(actionCreater.selectfirstListItemActionCreater(itemName, options))
+		selectfirstListItem: (itemName, options) => dispatch(actionCreater.selectfirstListItemActionCreater(itemName, options)),
+		getHospitalAddressOptions:() => dispatch(actionCreater.getHospitalAdressOptionsActionCreater())
 	}
 }
 

@@ -22,6 +22,7 @@ export default class SelfPagination extends React.Component {
 			page: page,
 			limit: size
 		}
+		console.log(page+'++++'+size)
 		this.props.onChange(page, size);
 		this.props.refresh(params);
 	}

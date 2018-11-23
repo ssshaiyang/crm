@@ -48,6 +48,11 @@ export const getEmployees = function(params, cb) {
     });*/
      get("/employees", params, cb);
 }
+export const putChangeList = function(params, cb) {
+    console.log(params)
+
+    put("/process/"+params.ruleId, params, cb);
+}
 
 export const getEmployeesEdit = function(params, cb) {
     // cb({
@@ -94,7 +99,7 @@ export const editMemberList = function(params, cb) {
     //     "error_code": 1000,
     //     "data": true
     // })
-     post('/employees'+params.employee_id,params.dataAll, cb)
+     put('/employees/'+params.employee_id,params.dataAll, cb)
 }
 export const getBankList = function(params, cb) {
     // cb({

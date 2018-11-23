@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Card, Input, Button, Form, Icon } from 'antd'
 import Grid from '../../../common/Grid.jsx'
+import moment from 'moment'
 import HospitalOperation from './hospitalOperation.jsx'
 import * as actionCreater from "../../../../actions/files/hospital/hospital.js"
 
@@ -19,6 +20,14 @@ export class ManuNameTableBox extends React.Component {
             limit: 10
         }
         this.props.getHospital(params);
+    }
+
+    componentWillReceiveProps(nextProps){
+        var hospitalList = nextProps.rowData.data;
+        console.log(hospitalList)
+        hospitalList.map(function(item){
+            item.create_time = moment(item.create_time*1000).format('YYYY-MM-DD') 
+        })
     }
 
     createColumnDefs() {

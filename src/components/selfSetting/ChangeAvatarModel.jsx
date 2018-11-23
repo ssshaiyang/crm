@@ -61,6 +61,7 @@ export class ChangeAvatarModel extends React.Component {
 		super(props);
 		this.state = {
 			fileList : [],
+			uploadFile:null,
 			loading: false
 		};
 	}
@@ -73,12 +74,13 @@ export class ChangeAvatarModel extends React.Component {
 
 		function cb(res) {
 			if (res.error_code === GLOBALSUCCESS) {
-				this.props.changeAvatar(res.data.head_picture)
+				this.props.changeAvatar(this.state.imgUrl)
 				message.success('修改头像成功')
 				this.cancel()
 			}
 		}
-		uploadAvatar(this.state.uploadFile, cb.bind(this))
+		console.log(this.state);
+		uploadAvatar( { head_picture: this.state.imgUrl}, cb.bind(this))
 	}
 
 	cancel() {
@@ -104,13 +106,23 @@ export class ChangeAvatarModel extends React.Component {
 		return true;
 	}
 
-	handleChange(file) {
-		//去除红框
-		if (file.fileList.length > 0)
-			file.fileList[0].status = 'done';
+	handleChange(obj) {
 		this.setState({
-			fileList: file.fileList
-		},()=> {console.log("aaaa",this.state.fileList)});
+			fileList: obj.fileList,
+		})
+		if(obj.file.status == 'done'){
+			console.log(obj);
+			this.setState({
+				imgUrl: obj.file.response.data,
+			})
+		}
+		return ;
+		//去除红框
+		// if (file.fileList.length > 0)
+		// 	file.fileList[0].status = 'done';
+		// this.setState({
+		// 	fileList: file.fileList
+		// },()=> {console.log("aaaa",this.state.fileList)});
 
 	}
 
@@ -127,10 +139,13 @@ export class ChangeAvatarModel extends React.Component {
 					<Form onSubmit={this.handleSubmit.bind(this)}>
 						<FormItem>
 			            	<Dragger
-			            		name="head_picture"
-			            		action="/uselessUrl"
+			            		name="file"
+			            		action={GLOBALURL + '/uploads'}
 								height = "100px"
-			            		headers={{Authorization:localStorage.getItem('token') || sessionStorage.getItem('token')}}
+			            		headers={{
+			            			Authorization:localStorage.getItem('eplustoken') || sessionStorage.getItem('eplustoken'),
+			            			"X-Requested-With": null,
+			            		}}
 			            		listType="picture-card"
 			            		beforeUpload={this.beforeUpload.bind(this)}
 			            		showUploadList={{showPreviewIcon:false}}

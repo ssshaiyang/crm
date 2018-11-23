@@ -69,6 +69,17 @@ export class invoiceCompanyNameTop extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps){
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingNameList(params)
+                console.log("自动刷新")
+        }
+     }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
         let params = {
@@ -113,10 +124,11 @@ export class invoiceCompanyNameTop extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record , index) {
         this.setState({
             name: record.billing_name,
-            id: record.billing_id
+            id: record.billing_id,
+            index: rowclicked
         })
     }
 
@@ -204,9 +216,9 @@ export class invoiceCompanyNameTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -329,7 +341,9 @@ export class invoiceCompanyNameTop extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)} />
+                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)}
+                    rowKey 
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />
                 </Modal>
             </div>
         )
@@ -343,6 +357,7 @@ function mapStateToProps(state) {
         userInfo: state.drugNameListInfo.userInfo,
         //获取开票公司列表
         rowData: state.billingInfo.data,
+        addCode:state.diffBillingInfo.addDiffBillingCode
     }
 }
 

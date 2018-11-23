@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio } from 'antd'
+import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Select, Cascader, DatePicker, Radio ,Popconfirm } from 'antd'
 import * as actionCreator from "../../../../actions/files/corporation/corporation.js"
 import * as actionCreater from "../../../../actions/files/invoiceCompany/invoiceCompany.js"
 import * as actionCreat from "../../../../actions/files/medicineName/medicineName.js"
@@ -76,6 +76,17 @@ export class InvoiceComponyTop extends React.Component {
     componentDidMount() {
 
     }
+    
+    componentWillReceiveProps(nextProps){
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingInfo(params)
+                console.log("自动刷新")
+        }
+    }
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
@@ -111,6 +122,14 @@ export class InvoiceComponyTop extends React.Component {
         });
     }
 
+    //删除公司账户
+    delCompanyInfo(key) {
+        const addBankAccount = [...this.state.addBankAccount];
+        this.setState({ 
+            addBankAccount: addBankAccount.filter(item => item.key !== key) 
+        });
+    }
+
     /**
      * 计量单位select方法
      */
@@ -136,6 +155,8 @@ export class InvoiceComponyTop extends React.Component {
                     billing_district: this.state.areaValue[2],
                     billing_contact: this.state.addContactors,
                     billing_account: this.state.addBankAccount,
+                    billing_address:values.billing_address,
+                    creator_name:this.props.userInfo.nickname,
                     business_license_code: values.business_license_code,
                     business_license_expire_time: values['business_license_expire_time'] ? Date.parse(values['business_license_expire_time'].format('YYYY-MM-DD')) / 1000 : '',
                     gmp_code: values.gmp_code,
@@ -188,7 +209,7 @@ export class InvoiceComponyTop extends React.Component {
     handleSubmitEditContactsInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
+            if (1) {
                 let editContactInfo = {
                     key: this.state.contactClickedInfo.key,
                     billing_contact_name: values.billing_contact_name,
@@ -238,10 +259,14 @@ export class InvoiceComponyTop extends React.Component {
      * 删除用户信息
      */
 
-    delManufacturerInfo() {
-        this.setState({
-            delManufacturerVisible: true
-        })
+    delManufacturerInfo(key) {
+        const addContactors = [...this.state.addContactors];
+        this.setState({ 
+            addContactors: addContactors.filter(item => item.key !== key) 
+        });
+        // this.setState({
+        //     delManufacturerVisible: true
+        // })
     }
 
     handleOkDelManufacturerInfo() {
@@ -459,9 +484,9 @@ export class InvoiceComponyTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -586,11 +611,14 @@ export class InvoiceComponyTop extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text,record,index) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="delete" /></span>
+                                                onClick={() =>this.updateManufacturerInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delManufacturerInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>   
+                                            
                                         </div>
                                     )}
                                 />
@@ -630,11 +658,13 @@ export class InvoiceComponyTop extends React.Component {
                                 />
                                 <Column
                                     title="操作"
-                                    key="operation"
-                                    render={() => (
+                                    key="operation" 
+                                    render={(text, record, index) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }} onClick={this.editBankInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delBankAccount.bind(this)}><Icon type="delete" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delCompanyInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>                                        
                                         </div>
                                     )}
                                 />
@@ -961,7 +991,7 @@ export class InvoiceComponyTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -973,7 +1003,7 @@ export class InvoiceComponyTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_phone : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1000,7 +1030,7 @@ export class InvoiceComponyTop extends React.Component {
                                 {getFieldDecorator('billing_contact_department', {
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_department : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1011,7 +1041,7 @@ export class InvoiceComponyTop extends React.Component {
                                 {getFieldDecorator('billing_contact_position', {
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_position : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1022,7 +1052,7 @@ export class InvoiceComponyTop extends React.Component {
                                 {getFieldDecorator('billing_contact_webchat', {
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_webchat : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1033,7 +1063,7 @@ export class InvoiceComponyTop extends React.Component {
                                 {getFieldDecorator('billing_contact_qq', {
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_qq : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1044,7 +1074,7 @@ export class InvoiceComponyTop extends React.Component {
                                 {getFieldDecorator('billing_contact_email', {
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_email : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1140,7 +1170,7 @@ export class InvoiceComponyTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.billing_bank_account : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1152,7 +1182,7 @@ export class InvoiceComponyTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.billing_account_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1164,7 +1194,7 @@ export class InvoiceComponyTop extends React.Component {
 
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.billing_account_user : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1197,7 +1227,7 @@ function mapStateToProps(state) {
     if (state.corporationInfo.areaInfo) {
         areaList.push(state.corporationInfo.areaInfo);
     }
-
+    console.log(state.drugNameListInfo)
     return {
         //获取区域信息
         areaInfo: areaList,
@@ -1207,6 +1237,7 @@ function mapStateToProps(state) {
         billingBankAccountInfo: state.billingInfo.billingBankAccountInfo,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        addCode:state.billingInfo.addBillingCode
     }
 }
 

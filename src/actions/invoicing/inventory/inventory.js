@@ -28,6 +28,9 @@ import {exportDate} from "../../../utils/common.js"
         getCapitalBankList(selfParams, cb)
     }
 }*/
+
+
+
 export const checkOutActionCreater = function(val) {
     return {
         type: 'INVENTORY_CHECKOUT_MODAL',

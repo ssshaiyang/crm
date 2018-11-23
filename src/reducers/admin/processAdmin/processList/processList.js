@@ -7,7 +7,8 @@ export default  function getProcessAdminList(state, action) {
     switch (action.type) {
         case 'GET_PROCESS_ADMIN_LIST':
             newState.data = action.payload.data;
-            newState.totalCount=action.payload.totalCount
+            newState.totalCount=action.payload.totalCount;
+            newState.ruleId=action.payload.ruleId
             break;
         case 'GET_PROCESS_LIST_PAGE':
             newState.page = action.payload.page;

@@ -48,11 +48,11 @@ export class MakeInvoiceCompanyModel extends React.Component {
         const columns = [{
             title: '开票公司编号',
             dataIndex: 'billing_id',
-            key: 'billing_name'
+            key: 'billing_id'
         }, {
             title: '开票公司名称',
-            dataIndex: 'make_invoice_company_name',
-            key: 'make_invoice_company_name',
+            dataIndex: 'billing_name',
+            key: 'billing_name',
         }];
         return (
             <div>

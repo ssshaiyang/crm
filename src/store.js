@@ -216,7 +216,8 @@ let initState = {
 	//进销存-直营-业务管理
 	editDrugInfo,
 	diffHospitalName,
-	agentInfo
+	agentInfo,
+	costPolicy
 }
 
 initState.changePsw = {

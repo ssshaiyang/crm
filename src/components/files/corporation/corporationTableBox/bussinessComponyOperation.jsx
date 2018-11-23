@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Modal, Icon, Form, Row, Col, Input, Cascader, Table, DatePicker, Radio } from 'antd'
+import moment from 'moment'
+import { Button, Modal, Icon, Form, Row,Popconfirm , Col, Input, Cascader, Table, DatePicker, Radio } from 'antd'
 import * as actionCreater from "../../../../actions/files/corporation/corporation.js"
 import * as actionCreator from "../../../../actions/files/medicineName/medicineName.js";
 
@@ -11,8 +12,8 @@ const Search = Input.Search;
 
 export class BussinessComponyOperation extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             addMechInfoVisible: false,
             ContactsModelVisible: false,
@@ -21,16 +22,43 @@ export class BussinessComponyOperation extends React.Component {
             delManufacturerVisible: false,
             deliver_contact_sex: 1,
             editBankInfoVisible: false,
-            delBankInfoVisible: false
+            delBankInfoVisible: false,
+            areaProvinceCode: this.props.data.deliver_province,
+            areaCityCode: this.props.data.deliver_city,
+            areaDistrictCode: this.props.data.deliver_district,
+            deliverConstactInfo:[],
+            addContactorCount:0,
+            addBankCount:0
         }
     }
 
     componentWillMount() {
+        console.log(this.props.data)
         this.setState({
             is_used: this.props.data.if_used == '是' ? 0 : 1,
             if_grab: this.props.data.if_grab == '是' ? 1 : 0
         })
     }
+
+    componentWillReceiveProps(nextProps){
+        if(nextProps.deliverConstactInfo !== this.props.deliverConstactInfo){
+            this.setState({
+                addContactors:nextProps.deliverConstactInfo,
+                addBankAccount:nextProps.deliverBankInfo
+            })
+        }
+        
+        if (nextProps.editDeliverInfoCode == 1000 && this.props.editDeliverInfoCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+                console.log("自动刷新")
+        }
+        console.log("执行了componentWillReceiveProps")
+    }
+
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
@@ -97,7 +125,8 @@ export class BussinessComponyOperation extends React.Component {
                     deliver_city: this.state.area ? this.state.area[1] : undefined,
                     deliver_district: this.state.area ? this.state.area[2] : undefined,
                     deliver_url: values.deliver_url ? values.deliver_url : undefined,
-                    deliver_contact: this.props.deliverConstactInfo ? this.props.deliverConstactInfo : undefined,
+                    deliver_address:values.deliver_address ? values.deliver_address : undefined,
+                    deliver_contact: this.state.deliverConstactInfo ? this.state.deliverConstactInfo : undefined,
                     deliver_accounts: this.props.deliverBankInfo ? this.props.deliverBankInfo : undefined,
                     deliver_account: values.deliver_account ? values.deliver_account : undefined,
                     deliver_password: values.deliver_password ? values.deliver_password : undefined,
@@ -121,6 +150,7 @@ export class BussinessComponyOperation extends React.Component {
                         deliver_province: params.deliver_province,
                         deliver_city: params.deliver_city,
                         deliver_district: params.deliver_district,
+                        deliver_address:params.deliver_address == undefined ? this.props.deliver_address : params.deliver_address,
                         deliver_url: params.deliver_url == undefined ? this.props.data.deliver_url : params.deliver_url,
                         deliver_contact: params.deliver_contact == undefined ? this.props.deliverConstactInfo : params.deliver_contact,
                         deliver_accounts: params.deliver_accounts == undefined ? this.props.deliverBankInfo : params.deliver_accounts,
@@ -139,7 +169,13 @@ export class BussinessComponyOperation extends React.Component {
                         creator_name: this.props.userInfo.username
                     }
                 }
+                console.log(editParams)
                 this.props.editDeliverInfo(editParams);
+                let data = {
+                     page: -1,
+                     limit: 10
+                }
+                this.props.getDeliverList(data)
             }
         });
     }
@@ -186,6 +222,55 @@ export class BussinessComponyOperation extends React.Component {
         })
     }
 
+     delContactInfo(record) {
+        const addContactors = [...this.state.addContactors];
+        console.log(record.manufacturer_contact_id)
+        if (record.manufacturer_contact_id) {
+            this.setState({
+            addContactors: addContactors.filter(item => 
+                //if (record.manufacturer_contact_id) {
+                    item.manufacturer_contact_id !== record.manufacturer_contact_id
+                   
+                //} else {
+                   // item.key !== record.key;
+                   // console.log("else")
+               // }
+            )
+        });
+        }else{
+            this.setState({
+                addContactors:addContactors.filter(item => item.addkey !== record.addkey)
+            })
+        }
+    }
+    updateContactInfo(record){
+        console.log(record)
+         this.setState({
+            updateManuVisible: true
+        })
+    }
+
+    delBankInfo(record){
+        console.log(record)
+        const addBankAccount = [...this.state.addBankAccount];
+       
+        if (record.manufacturer_account_id) {
+            this.setState({
+            addBankAccount: addBankAccount.filter(item => 
+                    item.manufacturer_account_id !== record.manufacturer_account_id
+          )
+        });
+        }else{
+            this.setState({
+                addBankAccount:addBankAccount.filter(item => item.addkey !== record.addkey)
+            })
+        }
+        // t
+    }
+
+    updateBamkInfo(record){
+        console.log(record)
+    }
     /**
      * 删除用户信息
      */
@@ -263,7 +348,7 @@ export class BussinessComponyOperation extends React.Component {
     handleSubmitContactsInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
+            if (1) {
                 let editContactInfo = {
                     deliver_contact_name: values.deliver_contact_name !== undefined ? values.deliver_contact_name : '',
                     deliver_contact_sex: values.deliver_contact_sex !== undefined ? values.deliver_contact_sex : '',
@@ -282,9 +367,12 @@ export class BussinessComponyOperation extends React.Component {
                 editContactInfo.deliver_contact_webchat !== this.state.contactClickedInfo.deliver_contact_webchat ? editContactInfo.deliver_contact_webchat : this.state.contactClickedInfo.deliver_contact_webchat;
                 editContactInfo.deliver_contact_qq !== this.state.contactClickedInfo.deliver_contact_qq ? editContactInfo.deliver_contact_qq : this.state.contactClickedInfo.deliver_contact_qq;
                 editContactInfo.deliver_contact_email !== this.state.contactClickedInfo.deliver_contact_email ? editContactInfo.deliver_contact_email : this.state.contactClickedInfo.deliver_contact_email;
-                for (let i = 0; i < this.props.deliverConstactInfo.length; i++) {
-                    if (this.props.deliverConstactInfo[i].deliver_contact_id == this.state.contactClickedInfo.deliver_contact_id) {
-                        this.props.deliverConstactInfo[i] = editContactInfo;
+                for (let i = 0; i < this.state.addContactors.length; i++) {
+                    if (this.state.addContactors[i].deliver_contact_id == this.state.contactClickedInfo.deliver_contact_id) {
+                        this.state.addContactors[i] = editContactInfo;
+                    }
+                    if (this.state.addContactors[i].addkey == this.state.contactClickedInfo.addkey) {
+                        this.state.addContactors[i] = editContactInfo;
                     }
                 }
             }
@@ -294,24 +382,24 @@ export class BussinessComponyOperation extends React.Component {
     handleSubmitAddContactsInfo(e) {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            if (!err) {
-                let data = {
-                    value: {
-                        deliver_contact_name: values.deliver_contact_name,
-                        deliver_contact_phone: values.deliver_contact_phone,
-                        deliver_contact_sex: this.state.addContactSex,
-                        deliver_contact_department: values.deliver_contact_department,
-                        deliver_contact_position: values.deliver_contact_position,
-                        deliver_contact_qq: values.deliver_contact_qq,
-                        deliver_contact_webchat: values.deliver_contact_webchat,
-                        deliver_contact_email: values.deliver_contact_email,
-                    },
-                    id: this.props.data.deliver_id
+            var addContactList = [];
+            if (1 == 1) {
+                let addContactors = {
+                    addkey: this.state.addContactorCount++,
+                    deliver_contact_name: values.deliver_contact_name,
+                    deliver_contact_phone: values.deliver_contact_phone,
+                    deliver_contact_sex: this.state.addContactSex == 1 ? '男' : '女',
+                    deliver_contact_department: values.deliver_contact_department,
+                    deliver_contact_position: values.deliver_contact_position,
+                    deliver_contact_qq: values.deliver_contact_qq,
+                    deliver_contact_webchat: values.deliver_contact_webchat,
+                    deliver_contact_email: values.deliver_contact_email,
                 }
-                this.props.addContactsInfo(data);
-                if (values) {
-                    this.props.deliverConstactInfo.push(data.value)
-                }
+                addContactList.push(addContactors);
+                this.setState({
+                    addContactors: addContactList,
+                })
+                console.log("执行练添加联系人");
             }
         });
     }
@@ -357,6 +445,19 @@ export class BussinessComponyOperation extends React.Component {
             }
         });
     }
+    //编辑
+    rowClickContactInfo(record) {
+        console.log(record)
+        this.setState({
+            contactClickedInfo: record
+        })
+    }
+
+    rowClickBankInfo(record) {
+        this.setState({
+            bankClickedInfo: record
+        })
+    }
 
     //是否可用单选按钮选中值
     onChange(e) {
@@ -393,12 +494,6 @@ export class BussinessComponyOperation extends React.Component {
         })
     }
 
-    //获取编辑联系人选中的值
-    rowClickContactInfo(record) {
-        this.setState({
-            contactClickedInfo: record
-        })
-    }
 
     //获取选中银行账号信息
     rowClickBankInfo(record) {
@@ -435,6 +530,10 @@ export class BussinessComponyOperation extends React.Component {
         this.setState({
             delBankInfoVisible: true
         })
+    }
+
+    updateBankInfo(){
+
     }
 
     handleOkDelBankInfo() {
@@ -516,7 +615,7 @@ export class BussinessComponyOperation extends React.Component {
                                     label="商业公司名称"
                                 >
                                     {getFieldDecorator('deliver_name', {
-
+                                        initialValue:this.props.data.deliver_name
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.deliver_name} style={{ width: 200 }} />
@@ -539,10 +638,10 @@ export class BussinessComponyOperation extends React.Component {
                                     label="所属地区"
                                 >
                                     {getFieldDecorator('deliver_area', {
-
+                                        
                                     })(
                                         <div>
-                                            <Cascader options={this.props.areaInfo} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" />
+                                            <Cascader defaultValue={[this.state.areaProvinceCode,this.state.areaCityCode,this.state.areaDistrictCode]} options={this.props.areaInfo[0]} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" />
                                         </div>
                                         )}
                                 </FormItem>
@@ -555,6 +654,7 @@ export class BussinessComponyOperation extends React.Component {
                                     {...formItemLayout3}
                                 >
                                     {getFieldDecorator('deliver_address', {
+                                        initialValue:this.props.data.deliver_address
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.deliver_address} />
@@ -578,7 +678,7 @@ export class BussinessComponyOperation extends React.Component {
                                 label="商业公司链接"
                             >
                                 {getFieldDecorator('deliver_url', {
-
+                                    initialValue:this.props.deliver_url
                                 })(
                                     <div>
                                         <Input defaultValue={this.props.data.deliver_url} />
@@ -591,10 +691,10 @@ export class BussinessComponyOperation extends React.Component {
                                     label="登录账号"
                                 >
                                     {getFieldDecorator('deliver_account', {
-
+                                        initialValue:this.props.data.deliver_account
                                     })(
                                         <div>
-                                            <Input placeholder='请输入你的登录账号' />
+                                            <Input defaultValue={this.props.data.deliver_account} placeholder='请输入你的登录账号' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -608,10 +708,10 @@ export class BussinessComponyOperation extends React.Component {
                                     label="登录密码"
                                 >
                                     {getFieldDecorator('deliver_password', {
-
+                                        initialValue:this.props.data.deliver_password
                                     })(
                                         <div>
-                                            <Input placeholder='请输入登录密码' />
+                                            <Input defaultValue={this.props.data.deliver_password} placeholder='请输入登录密码' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -635,7 +735,7 @@ export class BussinessComponyOperation extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.props.deliverConstactInfo} bordered={true} onRowClick={this.rowClickContactInfo.bind(this)}>
+                            <Table dataSource={this.state.addContactors} bordered={true} onRowClick={this.rowClickContactInfo.bind(this)}>
                                 <Column
                                     title="姓名"
                                     dataIndex="deliver_contact_name"
@@ -679,11 +779,13 @@ export class BussinessComponyOperation extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text, record ,index ) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="delete" /></span>
+                                                onClick={() =>this.updateContactInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delContactInfo(record)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>
                                         </div>
                                     )}
                                 />
@@ -705,7 +807,7 @@ export class BussinessComponyOperation extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.props.deliverBankInfo} bordered={true} onRowClick={this.rowClickBankInfo.bind(this)}>
+                            <Table dataSource={this.state.addBankAccount} bordered={true} onRowClick={this.rowClickBankInfo.bind(this)}>
                                 <Column
                                     title="开户行"
                                     dataIndex="deliver_account_name"
@@ -723,11 +825,14 @@ export class BussinessComponyOperation extends React.Component {
                                 />
                                 <Column
                                     title="操作"
-                                    key="operation"
-                                    render={() => (
+                                    key="operation_bankInfo"
+                                    render={(text, record ,index ) => (
                                         <div>
-                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }} onClick={this.editBankInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delBankInfo.bind(this)}><Icon type="delete" /></span>
+                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
+                                                onClick={() =>this.updateBankInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delBankInfo(record)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>
                                         </div>
                                     )}
                                 />
@@ -743,10 +848,10 @@ export class BussinessComponyOperation extends React.Component {
                                         label="营业执照代码"
                                     >
                                         {getFieldDecorator('business_license_code', {
-
+                                            initialValue:this.props.data.business_license_code
                                         })(
                                             <div>
-                                                <Input style={{ width: 200 }} placeholder='' />
+                                                <Input defaultValue={this.props.data.business_license_code} style={{ width: 200 }} placeholder='' />
                                             </div>
                                             )}
                                     </FormItem>
@@ -758,6 +863,7 @@ export class BussinessComponyOperation extends React.Component {
                                         label="营业执照过期日期"
                                     >
                                         {getFieldDecorator('business_license_expire_time', {
+                                            initialValue:moment(this.props.data.business_license_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -769,10 +875,10 @@ export class BussinessComponyOperation extends React.Component {
                                         label="GMP代码"
                                     >
                                         {getFieldDecorator('gmp_code', {
-
+                                            initialValue:this.props.data.gmp_code
                                         })(
                                             <div>
-                                                <Input style={{ width: 200 }} placeholder='' />
+                                                <Input defaultValue={this.props.data.gmp_code} style={{ width: 200 }} placeholder='' />
                                             </div>
                                             )}
                                     </FormItem>
@@ -784,6 +890,7 @@ export class BussinessComponyOperation extends React.Component {
                                         label="GMP过期日期"
                                     >
                                         {getFieldDecorator('gmp_expire_time', {
+                                            initialValue:moment(this.props.data.gmp_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -795,10 +902,10 @@ export class BussinessComponyOperation extends React.Component {
                                         label="生产许可证"
                                     >
                                         {getFieldDecorator('production_license', {
-
+                                            initialValue:this.props.data.production_license
                                         })(
                                             <div>
-                                                <Input style={{ width: 200 }} placeholder='' />
+                                                <Input defaultValue={this.props.data.production_license} style={{ width: 200 }} placeholder='' />
                                             </div>
                                             )}
                                     </FormItem>
@@ -810,6 +917,7 @@ export class BussinessComponyOperation extends React.Component {
                                         label="生产许可证有效期"
                                     >
                                         {getFieldDecorator('production_expire_time', {
+                                            initialValue:moment(this.props.data.production_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -821,10 +929,10 @@ export class BussinessComponyOperation extends React.Component {
                                         label="委托书"
                                     >
                                         {getFieldDecorator('proxy', {
-
+                                            initialValue:this.props.data.proxy
                                         })(
                                             <div>
-                                                <Input style={{ width: 200 }} placeholder='' />
+                                                <Input defaultValue={this.props.data.gmp_code} style={{ width: 200 }} placeholder='' />
                                             </div>
                                             )}
                                     </FormItem>
@@ -836,6 +944,7 @@ export class BussinessComponyOperation extends React.Component {
                                         label="委托书有效期"
                                     >
                                         {getFieldDecorator('proxy_expire_time', {
+                                            initialValue:moment(this.props.data.proxy_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -847,10 +956,10 @@ export class BussinessComponyOperation extends React.Component {
                                         label="协议区域"
                                     >
                                         {getFieldDecorator('protocol_region', {
-
+                                            initialValue:this.props.data.protocol_region
                                         })(
                                             <div>
-                                                <Input style={{ width: 200 }} placeholder='' />
+                                                <Input defaultValue={this.props.data.protocol_region} style={{ width: 200 }} placeholder='' />
                                             </div>
                                             )}
                                     </FormItem>
@@ -872,7 +981,7 @@ export class BussinessComponyOperation extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -887,7 +996,7 @@ export class BussinessComponyOperation extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{new Date().toLocaleDateString()}</p>
+                                                <p>{this.props.data.create_time}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -897,10 +1006,10 @@ export class BussinessComponyOperation extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('deliver_remark', {
-
+                                        initialValue:this.props.data.deliver_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' />
+                                            <input defaultValue={this.props.data.deliver_remark} type='textarea' className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -1300,7 +1409,8 @@ function mapStateToProps(state) {
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
         //添加联系人成功code
-        addContactCode: state.corporationInfo.addContactCode
+        addContactCode: state.corporationInfo.addContactCode,
+        editDeliverInfoCode:state.corporationInfo.editDeliverInfoCode
     }
 }
 function mapDispatchToProps(dispatch) {

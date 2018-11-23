@@ -27,6 +27,8 @@
         getCapitalBankList(selfParams, cb)
     }
 }*/
+import {getFlowsData} from "../../../utils/interface";
+
 export const CheckBoxAction = function(val) {
     return {
 
@@ -35,5 +37,24 @@ export const CheckBoxAction = function(val) {
             checkBoxVisible:val.checkBoxVisible,
             monthVisible:val.monthVisible
         }
+    }
+}
+
+export const getFlowDataList = function(param = {}) {
+    return (dispatch) => {
+        function cb(res) {
+            console.log(res)
+            console.log(res.error_code)
+            if (res.error_code === GLOBALSUCCESS) {
+                let action = {
+                    type: "INVENTORY_FORM_DATA_INIT",
+                    payload: {
+                        checkBoxVisible: res.data
+                    }
+                }
+                dispatch(action);
+            }
+        }
+        getFlowsData(param, cb);
     }
 }

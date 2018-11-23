@@ -2,6 +2,7 @@
 import {
     getProcessType
 } from '../../../../utils/interface.js'
+import {putAllDepartInfo} from "../../../../utils/interface";
 
 export const getProcessTopType = function() {
 
@@ -47,7 +48,6 @@ export const completeMemberInf = function(field) {
         }
     }
 }
-
 export const showModal = function(val) {
     return {
         type: 'ADD_RULES_MODAL',
@@ -57,3 +57,5 @@ export const showModal = function(val) {
         }
     }
 }
+
+

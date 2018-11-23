@@ -17,7 +17,9 @@ export const frameWorkClearModal = function(val) {
 //获取要删除的那条数据
 export const frameWorkmemberListEdit=function(employeeId){
     return (dispatch, getState) => {
+        console.log("运行了")
         function cb(res) {
+            console.log(res)
             if (res.error_code === GLOBALSUCCESS) {
                 let action = {
                     type: 'FRAME_WORK_LIST_MODIFY_EMPLOYEE',
@@ -112,7 +114,7 @@ export const frameWorkgetPositionListSelects= function() {
 export const frameWorkgetRolesListSelects= function() {
     return (dispatch) => {
         function cb(res) {
-            console.log("res",res)
+            // console.log("res",res)
             if (res.error_code === GLOBALSUCCESS) {
                 let action = {
                     type: 'FRAME_WORK_GET_ROLES_LIST',

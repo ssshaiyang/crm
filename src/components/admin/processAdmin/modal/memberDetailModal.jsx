@@ -23,8 +23,14 @@ const columnDefs = {
 }
 function selectionChaged() {
     const selections = this.gridApi.getSelectedRows()
-    console.log("selections",selections)
-    // this.props.selectionChanged(selections)
+    if(selections.length>1){
+        message.info("只能选择一个人员")
+        return false
+    }else{
+        console.log("selections",selections)
+        this.props.selectionChanged(selections)
+        this.props.saveChange(selections)
+    }
 }
 
 
@@ -49,7 +55,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         // getApi: (api) => dispatch(actionCreaterModal.getGridApiActionCreater(api)),
-        selectionChanged:(val)=>dispatch(actionCreaterModal.getGridSelected(val))
+        selectionChanged:(val)=>dispatch(actionCreaterModal.getGridSelected(val)),
+        saveChange:(val)=>dispatch(actionCreaterModal.saveChangeData(val))
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(Grid)

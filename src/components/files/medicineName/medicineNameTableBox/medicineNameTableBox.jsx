@@ -20,9 +20,11 @@ export class MedicineNameTableBox extends React.Component {
         }
         this.props.getDrugNameList(data);
         console.log(this.props.drugNameList)
+        console.log(this.props.searchDrugInfo.data)
     }
     componentDidMount(){
         console.log(this.props.drugNameList)
+        console.log(this.props.searchDrugInfo.data)
     }
     createColumnDefs() {
         return [
@@ -86,7 +88,7 @@ export class MedicineNameTableBox extends React.Component {
                         enableRowGroup: true,
                     }}
                     columnDefs={this.state.columnDefs}
-                    rowData={this.props.searchDrugInfo.data ? this.props.searchDrugInfo.data : this.props.drugNameList.data}
+                    rowData={this.props.drugNameList.data}
                     containerStyle={containerStyle}
                 >
 
@@ -97,6 +99,7 @@ export class MedicineNameTableBox extends React.Component {
 }
 
 function mapStateToProps(state) {
+    console.log(state.drugNameListInfo.data)
     return {
         //获取药品异名列表
         drugNameList: state.drugNameListInfo.data,

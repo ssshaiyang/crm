@@ -30,25 +30,50 @@ function onChange(e) {
 
 export class BusinessComnopyNameOperation extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             delAgentVisible: false,
             addMechInfoVisible: false,
             showMedicineNameVisible: false,
             searchText: '',
-            filtered: false
+            filtered: false,
+            name: this.props.data.deliver_name,
+            id: this.props.data.deliver_id
         }
     }
 
     componentWillMount() {
-
+        console.log(this.props.data)
     }
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
         //console.log('ssss', value)
     }
+
+    componentWillReceiveProps(nextProps){
+
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+                console.log("自动刷新")
+        }
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getDeliverList(params)
+                console.log("自动刷新")
+        }
+        console.log("执行了componentWillReceiveProps")
+    
+    }
+
 
     /**
      * 控制添加药品信息按钮
@@ -74,6 +99,7 @@ export class BusinessComnopyNameOperation extends React.Component {
         //console.log('ssss', value)
     }
 
+
     //添加药品信息对话框
     addMechInfo() {
         let param = {
@@ -88,10 +114,11 @@ export class BusinessComnopyNameOperation extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record , index ) {
         this.setState({
             name: record.deliver_name,
-            id: record.deliver_id
+            id: record.deliver_id,
+            rowclicked: index
         })
     }
 
@@ -128,7 +155,7 @@ export class BusinessComnopyNameOperation extends React.Component {
                         creator_name: this.props.userInfo.username,
                         different_deliver_remark: values.different_deliver_remark
                     },
-                    id: this.props.data.deliver_id
+                    id: this.props.data.different_deliver_id
                 }
                 this.props.editDeliverNameInfo(params);
             }
@@ -150,7 +177,7 @@ export class BusinessComnopyNameOperation extends React.Component {
             page: -1,
             limit: 10
         }
-        this.props.delDeliverNameInfo(this.props.data.deliver_id);
+        this.props.delDeliverNameInfo(this.props.data.different_deliver_id);
         this.setState({
             delAgentVisible: false
         }, () => {
@@ -160,7 +187,7 @@ export class BusinessComnopyNameOperation extends React.Component {
 
     handleCancelDelAgent() {
         this.setState({
-            agentModelVisible: false
+            delAgentVisible: false
         })
     }
 
@@ -239,10 +266,10 @@ export class BusinessComnopyNameOperation extends React.Component {
                                     label="异名商业公司名"
                                 >
                                     {getFieldDecorator('different_deliver_name', {
-
+                                        initialValue:this.props.data.different_deliver_name
                                     })(
                                         <div>
-                                            <Input style={{ width: 200 }} />
+                                            <Input defaultValue={this.props.data.different_deliver_name} style={{ width: 200 }} />
                                         </div>
                                         )}
                                 </FormItem>
@@ -260,7 +287,7 @@ export class BusinessComnopyNameOperation extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -285,10 +312,10 @@ export class BusinessComnopyNameOperation extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('different_deliver_remark', {
-
+                                        initialValue:this.props.data.different_deliver_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' />
+                                            <input defaultValue={this.props.data.different_deliver_remark} type='textarea' className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -315,7 +342,9 @@ export class BusinessComnopyNameOperation extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.rowData ? this.props.rowData.data : []} onRowClick={this.rowClick.bind(this)} />
+                    <Table columns={columns} dataSource={this.props.rowData} onRowClick={this.rowClick.bind(this)}
+                    rowKey
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/> />
                 </Modal>
 
                 <Modal
@@ -336,6 +365,8 @@ function mapStateToProps(state) {
         rowData: state.corporationInfo.data,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        delCode:state.drugNameListInfo.delDeliverNameCode,
+        editCode:state.drugNameListInfo.editDeliverNameCode
     }
 }
 function mapDispatchToProps(dispatch) {

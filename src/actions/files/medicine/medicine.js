@@ -2,7 +2,7 @@ import {
     getAllDrugListInfo, getClickedAgentInfo, getClickedBillingInfo, getClickedDeliverInfo,
     editClickedDrugInfo, getManufacturerListsInfo, getBillingComponyListsInfo, getBusinessComListsinfo,
     searchDrugListsInfo,addDrugFormInfoList,delClickedDrugInfoList,searchManufacturerInfoLists,
-    searchBilingComponyInfoLists,searchBusinessComInfoLists,getAgentInfoList, getDrugListSelector,getUserInfos
+    searchBilingComponyInfoLists,searchBusinessComInfoLists,getAgentListsinfo, getDrugListSelector,getUserInfos
    
 }
     from "../../../utils/interface.js"
@@ -28,8 +28,15 @@ export const getDrugListSelectorActionCreator = function(params = {}) {
 }
 
 //获取药品列表信息
-export const getDrugListInfo = function (pramas = {}) {
-    return (dispatch) => {
+export const getDrugListInfo = function (params = {}) {
+    return (dispatch, getState) => {
+        let state = getState();
+        let stateParams = {
+           
+            page: state.drugListInfo.page,
+            limit: state.drugListInfo.limit,
+        }
+        Object.assign(stateParams, params)
         function cb(res) {
             if (res.error_code === GLOBALSUCCESS) {
                 let action = {
@@ -38,10 +45,17 @@ export const getDrugListInfo = function (pramas = {}) {
                         data: res.data
                     }
                 }
+                let setToTalCountAction = {
+                    type: 'MEDICINE_PAGINATION_SET_TOTALCOUNT',
+                    payload: {
+                        totalCount: res.data.total_count
+                    }
+                }
                 dispatch(action);
+                dispatch(setToTalCountAction)
             }
         }
-        getAllDrugListInfo(pramas, cb);
+        getAllDrugListInfo(params, cb);
     }
 }
 
@@ -194,6 +208,8 @@ export const getBusinessComListinfo = function (pramas = {}) {
     }
 }
 
+
+
 //搜索药品信息
 export const searchDrugListInfo = function (pramas = {}) {
     return (dispatch) => {
@@ -318,7 +334,7 @@ export const getAgentInfo = function (param) {
             //console.log('sssssss', res)
             if (res.error_code === GLOBALSUCCESS) {
                 let action = {
-                    type: "GET_AGENT_INFO",
+                    type: "MEDICINE_GET_AGENT_INFO",
                     payload: {
                         data: res.data
                     }
@@ -326,6 +342,32 @@ export const getAgentInfo = function (param) {
                 dispatch(action);
             }
         }
-        getAgentInfoList(param, cb);
+        getAgentListsinfo(param, cb);
+    }
+}
+export const pageChange = function(page, limit) {
+
+   return {
+        type: 'MEDICINE_PAGINATION_CHANGE_PAGE',
+        payload: {
+            page: page,
+            limit: limit
+        }
+    }
+}
+
+export const initPagination = function() {
+    return {
+        type: 'MEDICINE_PAGINATION_INIT'
+    }
+}
+
+export const setToTalCount = function(totalCount) {
+    console.log(totalCount)
+    return {
+        type: 'MEDICINE_PAGINATION_SET_TOTALCOUNT',
+        payload: {
+            totalCount: totalCount
+        }
     }
 }

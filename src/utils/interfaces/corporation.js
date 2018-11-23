@@ -185,9 +185,9 @@ export const addContactInfosList = function (params, cb) {
     //       "deliver_bank_account": "662112154545",
     //       "deliver_account_name": "招商银行武林支行",
     //       "deliver_account_user": "吴系挂"
-    //     }]
+    //     }]s
     //   }, false, params);
-    post('/deliver/contact/' + params.id, params.value, cb)
+    post('/deliver/contact/' + params.id, params.values, cb)
 }
 
 //添加商业银行信息
@@ -207,7 +207,7 @@ export const addDeliverBankInfosList = function (params, cb) {
     //       "deliver_account_user": "吴系挂"
     //     }]
     //   }, false, params);
-    post('/deliver/account/' + params.id, params.value, cb)
+    post('/deliver/account/' + params.id, params.values, cb)
 }
 
 //编辑商业公司列表

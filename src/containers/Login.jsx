@@ -111,10 +111,12 @@ class Login extends React.Component {
 				if (params.exp) {
 					localStorage.setItem(TOKENNAME, res.data.token);
 					localStorage.setItem('uid', res.data.uid);
+                    localStorage.setItem('nickname', res.data.nickname);
 				} else {
 					localStorage.clear();
 					sessionStorage.setItem(TOKENNAME, res.data.token);
 					sessionStorage.setItem('uid', res.data.uid);
+                    sessionStorage.setItem('nickname', res.data.nickname);
 				}
 				this.props.history.push('/work')
 			}

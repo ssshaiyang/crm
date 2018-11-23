@@ -73,6 +73,7 @@ export class Filter extends React.Component {
 	}
 
 	doFilter() {
+		console.log(this.props.filter)
 		let filter = this.props.filter;
 		let params = {
 			approval_status: filter.approvalStatus,
@@ -89,7 +90,7 @@ export class Filter extends React.Component {
 	cancelFilter() {
 		this.props.cancelFilter();
 		let params = {
-			approval_status: 0,
+			approval_status: -1,
 			start_time: null,
 			end_time: null,
 			filter: null,
@@ -106,6 +107,10 @@ export class Filter extends React.Component {
 			display: 'none'
 		} : {};
 		let left = 63 + 136 * this.props.approvalType + 'px';
+		var newapprovalStatus =this.props.filter.approvalStatus;
+		if(newapprovalStatus==-1){
+            newapprovalStatus=0;
+		}
 		return (
 			<div style={styles.filter}>
 				<div style={Object.assign({},styles.selectPointer,{left:left})}/>
@@ -113,8 +118,8 @@ export class Filter extends React.Component {
 					defaultValue="全部"
 					style={Object.assign({},styles.select,isShowSelect)}
 					onChange={this.props.changeFilterStatus}
-					value={selects[this.props.filter.approvalStatus]}>
-					<Option value="0">全部</Option>
+					value={selects[newapprovalStatus]}>
+					<Option value="-1">全部</Option>
 					<Option value="1">审批中</Option>
 					<Option value="2">已通过</Option>
 					<Option value="3">被拒绝</Option>

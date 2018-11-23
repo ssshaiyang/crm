@@ -344,7 +344,33 @@ export const uploadCustomer = function (file, cb) {
 	// });
 	uploadFile('/customers/upload', 'file', file, cb)
 }
+// 上传员工信息表格接口
+export const uploadEmployees= function (file, cb) {
+    // cb({
+    // 	"error_code": 1000,
+    // 	"data": {
+    // 		"file": '20170823/xxxxxxx.png'
+    // 	}
+    // });
+	console.log(file)
+    uploadFile('/employees/lists', 'file', file, cb)
+}
 
+/**
+ * 上传用户信息表格接口
+ * @param  {[type]}   params [description]
+ * @param  {Function} cb     [description]
+ * @return {[type]}          [description]
+ */
+export const uploadEmployee = function (file, cb) {
+    // cb({
+    // 	"error_code": 1000,
+    // 	"data": {
+    // 		"file": '20170823/xxxxxxx.png'
+    // 	}
+    // });
+    uploadFile('/employees/upload', 'file', file, cb)
+}
 /**
  * 下载上传文件的模板
  * @return {[type]} [description]

@@ -41,6 +41,9 @@ export default function redeceName(state, action) {
 		case 'ADD_CUSTOMER_MODAL_COMPLETE_CUSTOMER_INF':
 			newState.data[action.payload.key] = action.payload.value;
 			break;
+		case 'ADD_CUSTOMER_MODAL_GET_ADRESS_OPTIONS':
+			newState.hospitalAddressOptions = action.payload.value;
+			break;
 		case 'ADD_CUSTOMER_MODAL_GET_HOSPITAL_OPTIONS':
 			newState.hospitalOptions = action.payload.hospitalOptions;
 			break;

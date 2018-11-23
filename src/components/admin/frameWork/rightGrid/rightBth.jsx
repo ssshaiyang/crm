@@ -28,6 +28,7 @@ import {
 } from '../../../../utils/interface.js'
 import error from '../../../../utils/error-message.json'
 import Eidt from './rightEdit.jsx'
+import * as actionCreator from "../../../../actions/admin/frameWork/rightGrid/rightEdit";
 const FormItem = Form.Item;
 export class Render extends React.Component {
     constructor(props) {
@@ -75,6 +76,7 @@ export class Render extends React.Component {
             }
         }
         this.props.form.validateFields((err, values) => {
+            console.log(this.props.data)
             if (!err) {
                 adminlogin(values, cb.bind(this));
             }
@@ -86,8 +88,12 @@ export class Render extends React.Component {
         })
     }
     modify(){
+        console.log(123)
         this.props.setId(true)
         this.props.modifyData(this.props.data.employee_id)
+        this.props.getPositionList()
+        this.props.getBranchList()
+        this.props.getRoleList()
     }
     render() {
         const {
@@ -96,7 +102,7 @@ export class Render extends React.Component {
         return (
             <div>
                 <Button
-                    icon="xiugaihuobianji"
+                    icon="modify"
                     className="gridButton"
                     style={{marginRight:'10px'}}
                     onClick={this.modify.bind(this)}
@@ -127,14 +133,16 @@ export class Render extends React.Component {
                         </div>
                     </Form>
                 </Modal>
-             <Eidt/>
             </div>
         )
     }
 }
-
+{/*<Eidt/>*/}
 function mapDispatchToProps(dispatch) {
     return {
+        getBranchList: () => dispatch(actionCreator.frameWorkgetBranchSelects()),
+        getRoleList: () => dispatch(actionCreator.frameWorkgetRolesListSelects()),
+        getPositionList:()=>dispatch(actionCreator.frameWorkgetPositionListSelects()),
         modifyData:(val)=>dispatch(actionCreater.frameWorkmemberListEdit(val)),
         setId:(val)=>dispatch(actionCreater.frameWorkmodifyModalActionCreater(val))
     }

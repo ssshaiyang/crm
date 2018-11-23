@@ -24,15 +24,55 @@ moment.locale('zh-cn');
 import GrabList from './grabList.jsx'
 import CheckBoxContent from './checkBox.jsx'
 import ReviewInfo from './reviewInfo.jsx'
+import ImportListPage from "./../directionImport/import/importListPage.jsx"
+import * as actionCreator from "../../../actions/invoicing/inventory/inventory.js"
 export class DirectionGrab extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            showCheckOut:"none"
+            showCheckOut:"none",
+            checkNum:-1,
+            dataYear:null,
+            dataMonth:null,
+            flowLimit:this.props.flowLimit,
+            flowPage:this.props.flowPage,
         }
     }
+    getFlows(){
+        console.log(this.state.dataYear)
+            let addDepartInfo = {
+                year: this.state.dataYear,
+                month: this.state.dataMonth,
+                page:this.state.flowPage,
+                limit:this.state.flowLimit,
+                status:this.state.checkNum
+            }
+            this.props.getFlowDataLists(addDepartInfo)
+    }
+    getFlowsDate(date, dateString){
+        console.log(date, dateString);
+        var dates = dateString.split(/[-]/);
 
+        this.setState({
+            dataYear:parseInt(dates[0]),
+            dataMonth:parseInt(dates[1]),
+        })
 
+    }
+
+    getFlowSelect(value){
+        let checkid = 0;
+        if(value == 0){
+            checkid =-1;
+        }else if(value ==1){
+            checkid = 1;
+        }else{
+            checkid=0;
+        }
+        this.setState({
+            checkNum:checkid
+        })
+    }
     render(){
         return(
             <div>
@@ -42,7 +82,7 @@ export class DirectionGrab extends React.Component {
                             <Row style={{width:"240px"}}>
                                 <Col span={6} style={{lineHeight:"28px"}}>选择月份</Col>
                                 <Col span={16}>
-                                    <MonthPicker defaultValue={moment('2015-01')} />
+                                    <MonthPicker  onChange={this.getFlowsDate.bind(this)} defaultValue={moment('2015-01')} />
                                 </Col>
                             </Row>
                         </div>
@@ -66,7 +106,7 @@ export class DirectionGrab extends React.Component {
                                                 <Row>
                                                     <Col span={7} style={{lineHeight:"28px",textAlign:"center"}}>抓取状态</Col>
                                                     <Col span={17}>
-                                                        <Select defaultValue="0" style={{ width:120 }}>
+                                                        <Select onChange={this.getFlowSelect.bind(this)} defaultValue="0" style={{ width:120 }}>
                                                             <Option value="0">所有状态</Option>
                                                             <Option value="1">已导入</Option>
                                                             <Option value="2">未导入</Option>
@@ -80,12 +120,13 @@ export class DirectionGrab extends React.Component {
                                                         <Input placeholder="搜索..."/>
                                                     </Col>
                                                     <Col span={5} style={{textAlign:"right"}}>
-                                                        <Button className="mainButton"><Icon type="search"/></Button>
+                                                        <Button onClick={this.getFlows.bind(this)} className="mainButton"><Icon type="search"/></Button>
                                                     </Col>
                                                 </Row>
                                             </Col>
                                         </Row>
                                         <GrabList/>
+                                        <ImportListPage/>
                                     </div>
                                 {/*查看*/}
                                     <div style={{display:this.props.isShowCheck}}>
@@ -106,8 +147,11 @@ export class DirectionGrab extends React.Component {
     }
 }
 function mapStateToProps(state){
+    console.log(state.bankList)
     console.log('123',state.directionGrab)
     return {
+        flowLimit:state.bankList.limit,
+        flowPage:state.bankList.page,
         isShowCheck:state.directionGrab.checkBoxVisible,
         isMountShow:state.directionGrab.monthVisible
     }
@@ -115,6 +159,7 @@ function mapStateToProps(state){
 function mapDispatchToProps(dispatch) {
     return {
         // showCheckOut:(val)=>(dispatch(actionCreater.CheckBoxAction(val)))
+        getFlowDataLists:(val)=>(dispatch(actionCreater.getFlowDataList(val)))
     }
 }
 

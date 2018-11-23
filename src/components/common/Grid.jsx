@@ -5,10 +5,11 @@
  * @Last Modified time: 2017-09-01 15:10:45
  * @Descriptions: 表格的通用UI组件,详细props使用方式,请见最下方
  */
+
 var license = "Evaluation_License_Valid_Until__16_September_2018__MTUzNzA1MjQwMDAwMA==b7ecc78983c1bf33b5eb3682cc62cfaa"
 import React from 'react'
 import {
-	AgGridReact
+    AgGridReact
 } from "ag-grid-react";
 import {LicenseManager} from "ag-grid-enterprise/main";
 LicenseManager.setLicenseKey(license);
@@ -129,7 +130,6 @@ export default class Grid extends React.Component {
 			}
 		}
 	}
-
 	render() {
 		const gridOptions = this.makeGridOptions.call(this);
 		Object.assign(gridOptions, this.props.gridOptions);

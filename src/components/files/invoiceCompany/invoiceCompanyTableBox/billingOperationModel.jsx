@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Card, Button, Modal, Icon, Form, Row, Col, Input, Cascader, Table, DatePicker, Radio, message } from 'antd'
+import moment from 'moment'
+import { Card, Button, Modal, Icon, Form, Row, Col, Input, Cascader, Table, DatePicker, Radio, message, Popconfirm } from 'antd'
 import * as actionCreator from "../../../../actions/files/medicineName/medicineName.js"
 import * as actionCreat from "../../../../actions/files/corporation/corporation.js"
 import * as actionBilling from "../../../../actions/files/invoiceCompany/invoiceCompany.js";
@@ -13,8 +14,8 @@ const RadioGroup = Radio.Group;
 
 export class BillingOperationModel extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             addMechInfoVisible: false,
             ContactsModelVisible: false,
@@ -22,16 +23,47 @@ export class BillingOperationModel extends React.Component {
             updateManuVisible: false,
             delManufacturerVisible: false,
             editBankVisible: false,
-            delBankVisible: false
+            delBankVisible: false,
+            areaProvinceCode: this.props.data.billing_province,
+            areaCityCode: this.props.data.billing_city,
+            areaDistrictCode: this.props.data.billing_district,
+            addContactorCount:0,
+            addBankCount:0
         }
     }
 
     componentWillMount() {
         this.props.getUserInfo(1);
+        console.log(this.props.data)
     }
 
     componentDidMount() {
 
+    }
+    componentWillReceiveProps(nextProps){
+        if(nextProps.addContactors !== this.props.addContactors){
+            this.setState({
+                addContactors:nextProps.addContactors,
+                addBankAccount:nextProps.addBankAccount
+            })
+        }
+        console.log("执行了componentWillReceiveProps")
+        if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingInfo(params)
+                console.log("自动刷新")
+        }
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000) {
+            let params ={
+                    page :-1 ,
+                    limit : 10
+                }
+                this.props.getBillingInfo(params)
+                console.log("自动刷新")
+        }
     }
 
     addMechInfo() {
@@ -70,9 +102,9 @@ export class BillingOperationModel extends React.Component {
                 let params = {
                     value: {
                         billing_name: values.billing_name !== billingInfo.billing_name ? values.billing_name : billingInfo.billing_name,
-                        billing_province: this.state.areaValue[0],
-                        billing_city: this.state.areaValue[1],
-                        billing_district: this.state.areaValue[2],
+                        billing_province: this.state.areaProvinceCode,
+                        billing_city: this.state.areaCityCode,
+                        billing_district: this.state.areaDistrictCode,
                         billing_address: values.billing_address !== billingInfo.billing_address ? values.billing_address : billingInfo.billing_address,
                         business_license_code: values.business_license_code !== billingInfo.business_license_code ? values.business_license_code : billingInfo.business_license_code,
                         business_license_expire_time: Date.parse(values['business_license_expire_time'].format('YYYY-MM-DD')) / 1000,
@@ -84,14 +116,19 @@ export class BillingOperationModel extends React.Component {
                         proxy_expire_time: Date.parse(values['production_expire_time'].format('YYYY-MM-DD')) / 1000,
                         protocol_region: values.protocol_region !== billingInfo.protocol_region ? values.protocol_region : billingInfo.protocol_region,
                         billing_remark: values.billing_remark !== billingInfo.billing_remark ? values.billing_remark : billingInfo.billing_remark,
-                        billing_contact: this.props.billingContactInfo,
-                        billing_account: this.props.billingBankAccountInfo,
+                        billing_contact: this.state.addContactors,
+                        billing_account: this.state.addBankAccount,
                         creator_name: this.props.userInfo.username
                     },
                     id: this.props.data.billing_id
                 }
                 this.props.editBilling(params);
             }
+            let param = {
+            page: -1,
+            limit: 10
+        }
+        this.props.getBillingInfo(param);
         });
     }
 
@@ -101,8 +138,9 @@ export class BillingOperationModel extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 let editValue = {
+                    addkey: this.state.contactClickedInfo.addkey || this.state.contactClickedInfo.billing_contact_id,
                     billing_contact_name: values.billing_contact_name !== this.state.rowClickContactInfo.billing_contact_name ? values.billing_contact_name : this.state.rowClickContactInfo.billing_contact_name,
-                    billing_contact_sex: values.billing_contact_sex !== this.state.rowClickContactInfo.billing_contact_sex ? values.billing_contact_sex : this.state.rowClickContactInfo.billing_contact_sex,
+                    billing_contact_sex: (values.billing_contact_sex !== this.state.rowClickContactInfo.billing_contact_sex ? values.billing_contact_sex : this.state.rowClickContactInfo.billing_contact_sex)==1 ?'男':'女',
                     billing_contact_department: values.billing_contact_department !== this.state.rowClickContactInfo.billing_contact_department ? values.billing_contact_department : this.state.rowClickContactInfo.billing_contact_department,
                     billing_contact_position: values.billing_contact_position !== this.state.rowClickContactInfo.billing_contact_position ? values.billing_contact_position : this.state.rowClickContactInfo.billing_contact_position,
                     billing_contact_phone: values.billing_contact_phone !== this.state.rowClickContactInfo.billing_contact_phone ? values.billing_contact_phone : this.state.rowClickContactInfo.billing_contact_phone,
@@ -110,10 +148,15 @@ export class BillingOperationModel extends React.Component {
                     billing_contact_webchat: values.billing_contact_webchat !== this.state.rowClickContactInfo.billing_contact_webchat ? values.billing_contact_webchat : this.state.rowClickContactInfo.billing_contact_webchat,
                     billing_contact_email: values.billing_contact_email !== this.state.rowClickContactInfo.billing_contact_email ? values.billing_contact_email : this.state.rowClickContactInfo.billing_contact_email,
                 }
-                let contactInfoList = this.props.billingContactInfo;
+                let contactInfoList = this.state.addContactors;
                 for (let i = 0; i < contactInfoList.length; i++) {
-                    if (contactInfoList[i].billing_contact_id == this.state.rowClickContactInfo.billing_contact_id) {
+                    if (contactInfoList[i].billing_contact_id == editValue.addkey ) {
                         contactInfoList[i] = editValue;
+                        console.log("billing_contact_id")
+                    }
+                     if (contactInfoList[i].addkey == editValue.addkey ) {
+                        contactInfoList[i] = editValue;
+                        console.log("addkey")
                     }
                 }
                 this.props.billingContactInfo = contactInfoList
@@ -218,31 +261,31 @@ export class BillingOperationModel extends React.Component {
 
     handleSubmitContactsInfo(e) {
         e.preventDefault();
+        let addContactList = this.state.addContactors;
         this.props.form.validateFields((err, values) => {
-            if (!err) {
-                // console.log('aaaaa', values);
-                let addValue = {
-                    values: {
-                        billing_contact_name: values.billing_contact_name,
-                        billing_contact_sex: values.billing_contact_sex,
-                        billing_contact_department: values.billing_contact_department,
-                        billing_contact_position: values.billing_contact_position,
-                        billing_contact_phone: values.billing_contact_phone,
-                        billing_contact_qq: values.billing_contact_qq,
-                        billing_contact_webchat: values.billing_contact_webchat,
-                        billing_contact_email: values.billing_contact_email,
-                    },
-                    billing_id: this.props.data.billing_id
+            console.log(values);
+            console.log(err);
+            if (1 == 1) {
+                let addContactors = {
+                    addkey: this.state.addContactorCount++,
+                    billing_contact_name: values.billing_contact_name,
+                    billing_contact_sex: values.billing_contact_sex == 1 ? '男' : '女',
+                    billing_contact_department: values.billing_contact_department,
+                    billing_contact_position: values.billing_contact_position,
+                    billing_contact_phone: values.billing_contact_phone,
+                    billing_contact_qq: values.billing_contact_qq,
+                    billing_contact_webchat: values.billing_contact_webchat,
+                    billing_contact_email: values.billing_contact_email,
                 }
-                this.props.addBillingContact(addValue);
-                if (values) {
-                    addValue.values.billing_contact_sex == 1 ? '男' : '女'
-                    this.props.billingContactInfo.push(addValue.values)
-                }
+                addContactList.push(addContactors);
+                this.setState({
+                    addContactors: addContactList,
+                })
+                console.log("执行练添加联系人");
             }
         });
+        console.log(this.state.addContactors)
     }
-
     /**
      * 修改联系人信息
      */
@@ -268,7 +311,11 @@ export class BillingOperationModel extends React.Component {
      * 删除联系人信息
      */
 
-    delManufacturerInfo() {
+    delManufacturerInfo(key) {
+        // const addContactors = [...this.state.addContactors];
+        // this.setState({ 
+        //     addContactors: addContactors.filter(item => item.key !== key) 
+        // });
         this.setState({
             delManufacturerVisible: true
         })
@@ -295,12 +342,7 @@ export class BillingOperationModel extends React.Component {
         })
     }
 
-    //获取修改联系人表单选中项
-    rowClickContactInfo(record) {
-        this.setState({
-            rowClickContactInfo: record
-        })
-    }
+
 
     //获取单选按钮信息
     onChange(e) {
@@ -351,28 +393,30 @@ export class BillingOperationModel extends React.Component {
     //获取级联地区的值
     getAreaValue(value) {
         this.setState({
-            areaValue: value
+            areaProvinceCode: value[0],
+            areaCityCode:value[1],
+            areaDistrictCode:value[2]
         })
     }
 
     //添加银行信息确定取表单值
     handleSubmitAddBankInfo(e) {
-        e.preventDefault();
+       e.preventDefault();
+        console.log("qweewqeqw")
+        let addBankAccountList = this.state.addBankAccount;
         this.props.form.validateFields((err, values) => {
-            if (!err) {
-                // console.log('aaaaa', values);
-                let addValue = {
-                    values: {
-                        billing_bank_account: values.billing_bank_account,
-                        billing_account_name: values.billing_account_name,
-                        billing_account_user: values.billing_account_user,
-                    },
-                    billing_id: this.props.data.billing_id
+            if (1) {
+                let data = {
+                    addkey: this.state.addBankCount++,
+                    billing_bank_account: values.billing_bank_account,
+                    billing_account_name: values.billing_account_name,
+                    billing_account_user: values.billing_account_user,
                 }
-                this.props.addBillingBankAccount(addValue);
-                if (values) {
-                    this.props.billingBankAccountInfo.push(addValue.values)
-                }
+                addBankAccountList.push(data);
+                this.setState({
+                    addBankAccount: addBankAccountList,
+                })
+                console.log("qweewqeqw")
             }
         });
     }
@@ -404,9 +448,144 @@ export class BillingOperationModel extends React.Component {
     }
 
     //编辑银行选中table值
+ 
+
+    //编辑
+    rowClickContactInfo(record) {
+        console.log(record)
+        this.setState({
+            contactClickedInfo: record
+        })
+    }
+
     rowClickBankInfo(record) {
         this.setState({
-            rowClickBankInfo: record
+            bankClickedInfo: record
+        })
+    }
+
+        //点击确认修改联系人信息
+    handleSubmitUpdateInfo(e) {
+       
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            console.log(this.state.contactClickedInfo)
+            console.log(values)
+            if (1) {
+                let editBankInfo = {
+                    addkey: this.state.contactClickedInfo.addkey !==undefined? this.state.contactClickedInfo.addkey : this.state.contactClickedInfo.billing_contact_id,
+                    billing_contact_name: values.edit_billing_contact_name,
+                    billing_contact_sex: values.edit_billing_contact_sex == 1 ? '男' : '女',
+                    billing_contact_department: values.edit_billing_contact_department,
+                    billing_contact_position: values.edit_billing_contact_position,
+                    billing_contact_phone: values.edit_billing_contact_phone,
+                    billing_contact_qq: values.edit_billing_contact_qq,
+                    billing_contact_webchat: values.edit_billing_contact_webchat,
+                    billing_contact_email: values.edit_billing_contact_email
+                }
+                console.log(editBankInfo.addkey)
+                let contactInfo = this.state.addContactors;
+
+                for (let i = 0; i < contactInfo.length; i++) {
+                    if (contactInfo[i].billing_contact_id == editBankInfo.addkey) {
+                        contactInfo[i] = editBankInfo;
+                        console.log("manufacturer_contact_id")
+                    }else if(contactInfo[i].addkey == editBankInfo.addkey){
+                        contactInfo[i] = editBankInfo;
+                        console.log("addkey")
+                    }
+                }
+                this.setState({
+                    addContactors: contactInfo,
+                })
+            }
+        });
+    }
+
+    //点击确认修改银行信息
+    handleBankSubmitUpdateInfo(e) {
+       
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            console.log(this.state.bankClickedInfo)
+            console.log(values)
+            if (1) {
+                let editBankInfo = {
+                    addkey: this.state.bankClickedInfo.addkey !==undefined? this.state.bankClickedInfo.addkey  : this.state.bankClickedInfo.billing_account_id,
+                    billing_account_name: values.edit_billing_account_name,
+                    billing_account_user: values.edit_billing_account_user,
+                    billing_bank_account: values.edit_billing_bank_account,
+                   
+                }
+                console.log(editBankInfo.addkey)
+                let bankInfo = this.state.addBankAccount;
+                for (let i = 0; i < bankInfo.length; i++) {
+                    if (bankInfo[i].billing_account_id == editBankInfo.addkey) {
+                        bankInfo[i] = editBankInfo;
+                        console.log("manufacturer_account_id")
+                    }else if(bankInfo[i].addkey == editBankInfo.addkey){
+                        bankInfo[i] = editBankInfo;
+                        console.log("addkey")
+                    }
+                }
+                this.setState({
+                    addBankAccount: bankInfo,
+                })
+            }
+        });
+    }
+
+        delContactInfo(record) {
+        const addContactors = [...this.state.addContactors];
+        console.log(record.billing_contact_id)
+        if (record.billing_contact_id) {
+            this.setState({
+            addContactors: addContactors.filter(item => 
+                //if (record.manufacturer_contact_id) {
+                    item.billing_contact_id !== record.billing_contact_id
+                   
+                //} else {
+                   // item.key !== record.key;
+                   // console.log("else")
+               // }
+            )
+        });
+        }else{
+            this.setState({
+                addContactors:addContactors.filter(item => item.addkey !== record.addkey)
+            })
+        }
+    
+    }
+    updateContactInfo(record){
+        console.log(record)
+         this.setState({
+            updateManuVisible: true,
+        })
+    }
+
+    delBankInfo(record){
+        console.log(record)
+        const addBankAccount = [...this.state.addBankAccount];
+       
+        if (record.billing_account_id) {
+            this.setState({
+            addBankAccount: addBankAccount.filter(item => 
+                    item.billing_account_id !== record.billing_account_id
+          )
+        });
+        }else{
+            this.setState({
+                addBankAccount:addBankAccount.filter(item => item.addkey !== record.addkey)
+            })
+        }
+        // t
+    }
+
+    updateBankInfo(record){
+        console.log(record);
+        this.setState({
+            editBankVisible: true
         })
     }
 
@@ -451,7 +630,7 @@ export class BillingOperationModel extends React.Component {
                                     label="开票公司名称"
                                 >
                                     {getFieldDecorator('billing_name', {
-
+                                        initialValue:this.props.data.billing_name
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.billing_name} style={{ width: 200 }} />
@@ -466,7 +645,7 @@ export class BillingOperationModel extends React.Component {
                                     label="开票公司地址"
                                 >
                                     {getFieldDecorator('billing_address', {
-
+                                        initialValue:this.props.data.billing_address
                                     })(
                                         <div>
                                             <Input defaultValue={this.props.data.billing_address} style={{ width: 200 }} />
@@ -481,10 +660,10 @@ export class BillingOperationModel extends React.Component {
                                     label="所属地区"
                                 >
                                     {getFieldDecorator('billing_area', {
-
+                                       
                                     })(
                                         <div>
-                                            <Cascader options={this.props.areaInfo} onChange={this.getAreaValue.bind(this)} placeholder="请选择所属地区" style={{ width: 300 }} />
+                                            <Cascader defaultValue={[this.state.areaProvinceCode,this.state.areaCityCode,this.state.areaDistrictCode]} options={this.props.areaInfo[0]} onChange={this.getAreaValue.bind(this)} placeholder="请选择所属地区" style={{ width: 300 }} />
                                         </div>
                                         )}
                                 </FormItem>
@@ -507,7 +686,7 @@ export class BillingOperationModel extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.props.billingContactInfo} onRowClick={this.rowClickContactInfo.bind(this)} bordered={true}>
+                            <Table dataSource={this.state.addContactors} onRowClick={this.rowClickContactInfo.bind(this)} bordered={true}>
                                 <Column
                                     title="姓名"
                                     dataIndex="billing_contact_name"
@@ -540,8 +719,8 @@ export class BillingOperationModel extends React.Component {
                                 />
                                 <Column
                                     title="微信"
-                                    dataIndex="manufacturer_contact_webchat"
-                                    key="manufacturer_contact_webchat"
+                                    dataIndex="billing_contact_webchat"
+                                    key="billing_contact_webchat"
                                 />
                                 <Column
                                     title="邮箱"
@@ -551,11 +730,13 @@ export class BillingOperationModel extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text, record ,index ) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="delete" /></span>
+                                                onClick={() =>this.updateContactInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delContactInfo(record)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>
                                         </div>
                                     )}
                                 />
@@ -577,7 +758,7 @@ export class BillingOperationModel extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.props.billingBankAccountInfo} bordered={true} onRowClick={this.rowClickBankInfo.bind(this)}>
+                            <Table dataSource={this.state.addBankAccount} bordered={true} onRowClick={this.rowClickBankInfo.bind(this)}>
                                 <Column
                                     title="开户行"
                                     dataIndex="billing_account_name"
@@ -596,10 +777,13 @@ export class BillingOperationModel extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation_bankInfo"
-                                    render={() => (
+                                    render={(text, record ,index ) => (
                                         <div>
-                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }} onClick={this.editBankInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delBankAccountInfo.bind(this)}><Icon type="delete" /></span>
+                                            <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
+                                                onClick={() =>this.updateBankInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delBankInfo(record)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>
                                         </div>
                                     )}
                                 />
@@ -615,7 +799,7 @@ export class BillingOperationModel extends React.Component {
                                         label="营业执照代码"
                                     >
                                         {getFieldDecorator('business_license_code', {
-
+                                            initialValue:this.props.data.business_license_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.business_license_code} style={{ width: 200 }} />
@@ -630,6 +814,8 @@ export class BillingOperationModel extends React.Component {
                                         label="营业执照过期日期"
                                     >
                                         {getFieldDecorator('business_license_expire_time', {
+                                             initialValue:moment(this.props.data.business_license_expire_time)
+
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -641,7 +827,7 @@ export class BillingOperationModel extends React.Component {
                                         label="GMP代码"
                                     >
                                         {getFieldDecorator('gmp_code', {
-
+                                             initialValue:this.props.data.business_license_code
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.business_license_code} style={{ width: 200 }} placeholder='' />
@@ -656,6 +842,7 @@ export class BillingOperationModel extends React.Component {
                                         label="GMP过期日期"
                                     >
                                         {getFieldDecorator('gmp_expire_time', {
+                                            initialValue:moment(this.props.data.gmp_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -667,7 +854,7 @@ export class BillingOperationModel extends React.Component {
                                         label="生产许可证"
                                     >
                                         {getFieldDecorator('production_license', {
-
+                                             initialValue:this.props.data.production_license
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.production_license} style={{ width: 200 }} placeholder='' />
@@ -682,6 +869,7 @@ export class BillingOperationModel extends React.Component {
                                         label="生产许可证有效期"
                                     >
                                         {getFieldDecorator('production_expire_time', {
+                                            initialValue:moment(this.props.data.production_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -693,7 +881,7 @@ export class BillingOperationModel extends React.Component {
                                         label="委托书"
                                     >
                                         {getFieldDecorator('proxy', {
-
+                                             initialValue:this.props.data.proxy
                                         })(
                                             <div>
                                                 <Input defaultValue={this.props.data.proxy} style={{ width: 200 }} placeholder='' />
@@ -708,6 +896,7 @@ export class BillingOperationModel extends React.Component {
                                         label="委托书有效期"
                                     >
                                         {getFieldDecorator('proxy_expire_time', {
+                                            initialValue:moment(this.props.data.proxy_expire_time)
                                         })(
                                             <DatePicker style={{ width: 200 }} />
                                             )}
@@ -744,7 +933,7 @@ export class BillingOperationModel extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -972,11 +1161,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="姓名"
                             >
-                                {getFieldDecorator('billing_contact_name', {
-
+                                {getFieldDecorator('edit_billing_contact_name', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_name : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -984,10 +1173,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="电话"
                             >
-                                {getFieldDecorator('billing_contact_phone', {
+                                {getFieldDecorator('edit_billing_contact_phone', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_phone : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_phone : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -999,7 +1189,8 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="性别"
                             >
-                                {getFieldDecorator('billing_contact_sex', {
+                                {getFieldDecorator('edit_billing_contact_sex', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_sex : ''
                                 })(
                                     <RadioGroup onChange={this.onChange.bind(this)} initialValue={1}>
                                         <Radio value={1}>男</Radio>
@@ -1011,10 +1202,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="部门"
                             >
-                                {getFieldDecorator('billing_contact_department', {
+                                {getFieldDecorator('edit_billing_contact_department', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_department : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_department : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1022,10 +1214,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="职务"
                             >
-                                {getFieldDecorator('billing_contact_position', {
+                                {getFieldDecorator('edit_billing_contact_position', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_position : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_position : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1033,10 +1226,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="微信"
                             >
-                                {getFieldDecorator('billing_contact_webchat', {
+                                {getFieldDecorator('edit_billing_contact_webchat', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_webchat : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_webchat : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1044,10 +1238,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="QQ"
                             >
-                                {getFieldDecorator('billing_contact_qq', {
+                                {getFieldDecorator('edit_billing_contact_qq', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_qq : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_qq : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1055,10 +1250,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="邮箱"
                             >
-                                {getFieldDecorator('billing_contact_email', {
+                                {getFieldDecorator('edit_billing_contact_email', {
+                                    initialValue:this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_email : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.billing_contact_email : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1080,18 +1276,18 @@ export class BillingOperationModel extends React.Component {
                     footer={null}
                     closable={false}
                 >
-                    <Form onSubmit={this.handleSubmitEditBankInfo.bind(this)}>
+                    <Form onSubmit={this.handleBankSubmitUpdateInfo.bind(this)}>
                         {/* 第一层 */}
                         <div className='botLine'>
                             <FormItem
                                 {...formItemLayout}
                                 label="账号"
                             >
-                                {getFieldDecorator('billing_bank_account', {
-
+                                {getFieldDecorator('edit_billing_bank_account', {
+                                      initialValue:this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_bank_account : ''                                   
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_bank_account : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1099,11 +1295,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="开户行"
                             >
-                                {getFieldDecorator('billing_account_name', {
-
+                                {getFieldDecorator('edit_billing_account_name', {
+                                    initialValue:this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_account_name : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input  defaultValue={this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_account_name : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1111,11 +1307,11 @@ export class BillingOperationModel extends React.Component {
                                 {...formItemLayout}
                                 label="开户名"
                             >
-                                {getFieldDecorator('billing_account_user', {
-
+                                {getFieldDecorator('edit_billing_account_user', {
+                                    initialValue:this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_account_user : ''
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input defaultValue={this.state.bankClickedInfo ? this.state.bankClickedInfo.billing_account_user : ''} style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -1169,11 +1365,13 @@ function mapStateToProps(state) {
         //获取区域信息
         areaInfo: areaList,
         //查询开票公司联系人信息
-        billingContactInfo: state.billingInfo.billingContactInfo,
+        addContactors: state.billingInfo.billingContactInfo,
         //开票公司银行账户信息
-        billingBankAccountInfo: state.billingInfo.billingBankAccountInfo,
+        addBankAccount: state.billingInfo.billingBankAccountInfo,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        delCode:state.billingInfo.delBillingCode,
+        editCode:state.billingInfo.editBillingCode
     }
 }
 function mapDispatchToProps(dispatch) {
@@ -1200,6 +1398,7 @@ function mapDispatchToProps(dispatch) {
         delBilling: (param) => dispatch(actionBilling.delBillingInfo(param)),
         //获取开票公司列表
         getBillingInfo: (params) => dispatch(actionBilling.getBillingInfoList(params)),
+
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(BillingOperationModel))

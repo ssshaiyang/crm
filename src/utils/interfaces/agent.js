@@ -19,3 +19,28 @@ export const getAgentInfoLists = function(params, cb) {
 export const addAgentInfoLists = function(params, cb) {
 	post('/agent', params, cb)
 }
+
+export const getAgentContactInfo = function(params, cb) {
+	get('/agent/contact/'+params, null, cb)
+}
+
+export const getAgentBankInfo = function(params, cb) {
+	get('/agent/account/'+params, null, cb)
+}
+
+export const addAgentBankInfo = function(params, cb) {
+	post('/agent/account/'+params.id, params.values, cb)
+}
+
+export const addAgentContactInfo = function(params, cb) {
+	post('/agent/contact/'+params.id, params.values, cb)
+}
+
+
+export const delAgent = function(params, cb){
+    del('/agent/'+params,null,null)
+}
+
+export const editAgent = function(params, cb){
+    put('/agent/'+params.id,params.values,null)
+}

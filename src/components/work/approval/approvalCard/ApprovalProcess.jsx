@@ -9,7 +9,7 @@
 
 import React from 'react'
 import {
-	Steps
+	Steps,Popover
 } from 'antd'
 const Step = Steps.Step
 import {
@@ -29,12 +29,15 @@ export class ApprovalProcess extends React.Component {
 
 		renderStep(steps) {
 				return steps.map((step, i) => {
-							let description = step.approval_record_status >= 2 ? <p>{formatDate(step.approval_create_time)}</p> : <p/>;
+							let description = step.approval_record_status >= 2 ? <p><p>{steps[i].employee_name}</p>{formatDate(step.approval_create_time)}<p>{steps[i].approval_record_remark}</p></p>: step.approval_record_status = 1?<p><p>{steps[i].employee_name}</p></p>:<p></p>;
 							return <Step
 								key={i}
 								status={['wait','process','finish','error'][step.approval_record_status]}
-								title={<Name uid={step.applicant_uid} noColor>{step.applicant}</Name>}
-								description={description}/>})
+								title={description}
+								/>
+
+
+				})
 		}
 
 	render() {

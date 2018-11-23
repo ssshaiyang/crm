@@ -58,7 +58,7 @@ export class SquareAppBlock extends React.Component {
         const status = this.props.status;
         const display = (status !== undefined && (status.toString() === '0' || status.toString() === '1')) ? 'block' : 'none';
         return (
-            <Col style={styles.container} lg={4} md={6} sm={6} xs={12}>
+            <Col style={styles.container} lg={12} md={12} sm={12} xs={12}>
                 <div style={{position:'relative',width:"100px",margin:'0 auto'}}>
                     {/* <p style={Object.assign({},styles.tips,{display:display})}>
                         {status?'已安装':'未安装'}

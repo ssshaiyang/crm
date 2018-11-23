@@ -6,7 +6,6 @@ import {get,
     uploadFile
 } from './setup.js'
 
-
 export const getCompanies = function(params, cb) {
  // cb({
  //        "error_code": 1000,
@@ -20,14 +19,16 @@ export const getCompanies = function(params, cb) {
  //            "company_website":"http://www.kangcenet.com",
  //        }
  //    });
-     get("/companies/1",null, cb);
+    var company_id =sessionStorage.getItem("company_id");
+    console.log(company_id)
+     get("/companies/"+company_id,null, cb);
 }
 export const getCompaniesEdit = function(params, cb) {
     // cb({
     //     "error_code": 1000,
     //     "data": true
     // });
-     put("/companies", params, cb);
+    post("/companies", params, cb);
 }
 
 export const uploadCompanyLogo = function(params, cb) {
@@ -37,6 +38,7 @@ export const uploadCompanyLogo = function(params, cb) {
     //         "logo":"20160820/42a79759f284b767dfcb2a0197904287.jpg",
     //     }
     // })
-     uploadFile('/companies/logo',"company_logo", params, cb)
+    post("/companies/logo",params, cb)
+     // uploadFile('/companies/logo',"company_logo", params, cb)
 }
 

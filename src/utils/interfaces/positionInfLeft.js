@@ -4,6 +4,7 @@ import {
     put,
     del
 } from './setup.js'
+import {getPositionListInfo} from "../interface";
 
 
 export const getDepartSelectListInfo = function (params, cb) {
@@ -52,3 +53,19 @@ export const getAllMenuListInfo = function (params, cb) {
     // }, false, params);
     get('/positions', params, cb);
 }
+// 修改相应职位
+export const putAllDepartInfo = function (params, cb) {
+    let position_id = params.position_id;
+   let paramss = {
+        position_name: params.position_name,
+        parent_position_id:params.parent_position_id,
+    }
+    put('/positions/'+position_id, paramss, cb);
+}
+
+// 删除相应职位
+export const deleteAllDepartInfo = function (params, cb) {
+    del('/positions/'+params, null, cb);
+}
+
+

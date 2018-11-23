@@ -16,6 +16,9 @@ export default function global(state, action) {
 			newState.companyLogined = action.payload.companyLogined;
 			newState.companyLoginedName = action.payload.companyLoginedName;
 			break;
+		case 'GET_AREA_OTHER_INFO':
+            newState.areaInfo = action.payload.data;
+            break;
 	}
 	return newState;
 }

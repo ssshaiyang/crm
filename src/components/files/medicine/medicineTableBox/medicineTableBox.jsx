@@ -6,6 +6,7 @@ import BusinessCompanyModal from './businessCompanyModal.jsx'
 import MakeInvoiceCompanyModel from './makeInvoiceCompanyModel.jsx'
 import MedicineAgentModel from './medicineAgentModel.jsx'
 import MedincineOperationModel from './medincineOperationModel.jsx'
+import MedicinePagination from './MedicinePagination.jsx'
 import * as actionCreater from "../../../../actions/files/medicine/medicine.js"
 
 export class AgentTableBox extends React.Component {
@@ -19,8 +20,8 @@ export class AgentTableBox extends React.Component {
 
     componentWillMount() {
         const data = {
-            page: -1,
-            limit: 10
+            page: 1,
+            limit: 5
         }
         this.props.getDrugList(data);
         console.log(this.props.drugsListInfo)
@@ -41,30 +42,66 @@ export class AgentTableBox extends React.Component {
         drugsListInfo.map(function(item){
             switch(item.unit){
                 case'1':
-                item.unit = '盒'
+                item.unitName = '盒'
                 break;
                 case'2':
-                item.unit = '件'
+                item.unitName = '件'
                 break;
                 case'3':
-                item.unit = '瓶'
+                item.unitName = '瓶'
                 break;
                 case'4':
-                item.unit = '支'
+                item.unitName = '支'
                 break;
+            }
+            switch(item.if_disabled){
+                case 1:
+                item.if_disabledName = '是'
+                break;
+                case 2:
+                item.if_disabledName = '否'
+                break;
+            }
+            switch(item.if_distribution){
+                case 1:
+                item.if_distributionName = '是'
+                break;
+                case 2:
+                item.if_distributionName = '否'
+                break;
+            }
+            switch(item.bid_type){
+                case 1:
+                item.bid_typeName = '国家基药'
+                break;
+                case 2:
+                item.bid_typeName = '军标'
+                break;
+                case 3:
+                item.bid_typeName = '廉价药品'
+                break;
+                case 4:
+                item.bid_typeName = '省增补药品'
+                break;
+                case 5:
+                item.bid_typeName = '备案采购'
+                break;
+
             }
             console.log(item.gmp_expire_time);
             var gmpDate = that.getChangeDate(item.gmp_expire_time);
             var businessDate = that.getChangeDate(item.business_license_expire_time);
             var productionDate = that.getChangeDate(item.production_expire_time);
             var proxyDate = that.getChangeDate(item.proxy_expire_time);
+            var createDate = that.getChangeDate(item.create_time);
 
             // this.getChangeDate = that.getChangeDate.bind(this);
           
-            item.gmp_expire_time =  gmpDate;
-            item.business_license_expire_time =  businessDate;
-            item.production_expire_time =  productionDate;
-            item.proxy_expire_time =  proxyDate;
+            item.gmp_expire_time_show =  gmpDate;
+            item.business_license_expire_time_show =  businessDate;
+            item.production_expire_time_show =  productionDate;
+            item.proxy_expire_time_show =  proxyDate;
+            item.create_time_show = createDate;
             
             
         })
@@ -116,19 +153,19 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "规格",
-                field: 'specification',
+                field: 'spec',
                 width: 100,
 
             },
             {
                 headerName: "计量单位",
-                field: 'unit',
+                field: 'unitName',
                 width: 100,
 
             },
             {
                 headerName: "生产厂家",
-                field: 'manufacturer_id',
+                field: 'manufacturer_name',
                 width: 100,
 
             },
@@ -152,7 +189,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "中标类型",
-                field: 'bid_type',
+                field: 'bid_typeName',
                 width: 100,
 
             },
@@ -185,13 +222,19 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "其他费用",
-                field: 'if_distribution',
+                field: 'other_price',
                 width: 100,
 
             },
             {
                 headerName: "是否停用",
-                field: 'if_disabled',
+                field: 'if_disabledName',
+                width: 100,
+
+            },
+            {
+                headerName: "新药分销",
+                field: 'if_distributionName',
                 width: 100,
 
             },
@@ -203,15 +246,10 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "国家医保代码",
-                field: 'floor_price',
-                width: 100,
-            },
-            {
-                headerName: "国家医保代码",
                 field: 'country_medicare_code',
                 width: 100,
-
             },
+            
             {
                 headerName: "营业执照代码",
                 field: 'business_license_code',
@@ -220,13 +258,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "营业执照过期日期",
-                field: 'isable',
-                width: 100,
-
-            },
-            {
-                headerName: "省级医保代码",
-                field: 'business_license_expire_time',
+                field: 'business_license_expire_time_show',
                 width: 100,
 
             },
@@ -238,7 +270,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "GMP过期日期",
-                field: 'gmp_expire_time',
+                field: 'gmp_expire_time_show',
                 width: 100,
 
             },
@@ -250,7 +282,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "生产许可证过期日期",
-                field: 'production_expire_time',
+                field: 'production_expire_time_show',
                 width: 100,
 
             },
@@ -262,7 +294,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "委托书过期时间",
-                field: 'proxy_expire_time',
+                field: 'proxy_expire_time_show',
                 width: 100,
             },
             {
@@ -282,7 +314,7 @@ export class AgentTableBox extends React.Component {
             },
             {
                 headerName: "创建时间",
-                field: 'create_time',
+                field: 'create_time_show',
                 width: 100,
             },
             {
@@ -318,6 +350,10 @@ export class AgentTableBox extends React.Component {
                     containerStyle={containerStyle}
                 >
                 </Grid>
+                <div style={{textAlign:'center',marginTop:'24px'}}>
+                    <MedicinePagination refresh={this.props.refreshList}
+                                        initPagination={this.props.initPagination}  />
+                </div>
             </div>
         )
     }
@@ -325,6 +361,9 @@ export class AgentTableBox extends React.Component {
 function mapDispatchToProps(dispatch) {
     return {
         //获取药品列表
+        //refreshList: (params) => dispatch(actionCreater.getCustomerListActionCreater(params)),
+        initPagination:() => dispatch(actionCreater.initPagination()),
+        refreshList:(params) => dispatch(actionCreater.getDrugListInfo(params)),
         getDrugList: (params) => dispatch(actionCreater.getDrugListInfo(params)),
     }
 }

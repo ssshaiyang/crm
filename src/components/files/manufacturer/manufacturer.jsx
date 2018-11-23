@@ -12,7 +12,7 @@ export class Manufacturer extends React.Component {
     render(){
         return (
             <div style={{ padding: "35px 0" }}>
-                <Card title='已归档'>
+                <Card title='生产厂家'>
                     <ManufacturerTopMenu />
                     <ManufacturerTableBox/ >
                 </Card>

@@ -74,7 +74,7 @@ class StateBlock extends React.Component {
 		this.props.initFilter();
 		this.props.refreshApprovals({
 			approval_type: this.props.selfType,
-			approval_status: 0,
+			approval_status: -1,
 			start_tiem: null,
 			end_time: null,
 			page: 1,

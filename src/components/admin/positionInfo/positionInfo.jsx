@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Card, Modal, Form, Select, Input, Button, Row, Col, message } from 'antd';
 import * as actionCreator from "../../../actions/admin/positionInf/positionInfTop.js";
 import LeftPosition from './positionInfoLeft.jsx'
+import * as actionCreaterModal from "../../../actions/admin/processAdmin/modal/addRuleModal";
 
 const Option = Select.Option;
 export class PositionInfo extends React.Component {
@@ -10,42 +11,37 @@ export class PositionInfo extends React.Component {
         super();
         this.state = {
             visible: false,
-            select_parent_id: 0
+            select_parent_id: 0,
+            checkCode:0,
         }
     }
     componentWillMount() {
-
     }
 
     addPosition() {
+        this.props.getSelectList();
         this.setState({
             visible: true
         })
-        this.props.getSelectList();
     }
 
     handleOk() {
-        let addPositionInfo = {};
-        if (this.state.select_parent_id && this.state.position_name) {
-            let select_parent_id = this.state.select_parent_id + 1;
-            addPositionInfo = {
+        let addDepartInfo= {};
+        let selectbollan = 0;
+        if(this.state.select_parent_id ==0){
+            selectbollan =1;
+        }else{
+            selectbollan =this.state.select_parent_id
+        }
+        if (selectbollan && this.state.position_name) {
+            let select_parent_id = this.state.select_parent_id;
+            addDepartInfo = {
                 parent_position_id: select_parent_id,
                 position_name: this.state.position_name
             }
         }
+        console.log(addDepartInfo)
         this.props.addDepartInfo(addDepartInfo);
-        console.log('sssss',this.props.addDepartInfoCode);
-        if (this.props.addDepartInfoCode == GLOBALSUCCESS) {
-            message.info('添加职位成功!');
-            this.setState({
-                visible: false,
-            });
-        } else {
-            message.info('添加职位失败!');
-            this.setState({
-                visible: true,
-            });
-        }
     }
 
     handleCancel() {
@@ -65,7 +61,7 @@ export class PositionInfo extends React.Component {
     }
 
     handleChange(value) {
-        const parent_id = parseInt(value)
+        const parent_id = value;
         this.setState({
             select_parent_id: parent_id
         })
@@ -77,21 +73,36 @@ export class PositionInfo extends React.Component {
         })
     }
 
+    cancel(mode){
+        this.setState({
+            checkCode:mode
+        })
+    }
     render() {
         let selectLists = [];
-        for (let index in this.props.selectData) {
-            selectLists.push(this.props.selectData[index]);
+        let selectListId =this.props.selectData;
+        if(this.props.addPositionInfoCode ==GLOBALSUCCESS){
+            message.info('添加职位成功!');
+            this.setState({
+                checkCode:1000,
+                visible: false,
+            })
+            this.props.checkCodeData();
         }
-        let selectLastPosition = selectLists.map((selectList, key) => {
-            return (
-                <Option value={key.toString()}>{selectList}</Option>
-            );
+        for (let index in this.props.selectData.position) {
+            selectLists.push(this.props.selectData.position[index]);
+        }
+        let selectLastDepart = selectLists.map((selectList, key) => {
+                return (
+                    <Option value={selectListId.parent_id[key]}>{selectList}</Option>
+                );
+
         })
         return (
             <div style={{ padding: "35px 0" }}>
                 <Card title='职位信息' extra={<Button size='small' className='addPosition' onClick={this.addPosition.bind(this)}>添加职位</Button>}>
                     <Row>
-                        <Col span={1}><LeftPosition /></Col>
+                        <Col span={1}><LeftPosition code={this.state.checkCode} cancel={mode=>this.cancel(mode)} /></Col>
                         <Col span={2}>
                             {/* <RigthPosition /> */}
                         </Col>
@@ -127,15 +138,16 @@ export class PositionInfo extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        selectData: state.getPositionSelectList.data,
-        addPositionInfoCode: state.getPositionSelectList.code
+        selectData: state.getDepartSelectList.data,
+        addPositionInfoCode: state.getDepartSelectList.code
     }
 }
 
 function mapDispatchToProps(dispatch) {
     return {
         getSelectList: () => dispatch(actionCreator.getSelectList()),
-        addPositionInfo: (val) => dispatch(actionCreator.addPositionInfo(val)),
+        addDepartInfo: (val) => dispatch(actionCreator.addDepartInfo(val)),
+        checkCodeData: () => dispatch(actionCreator.checkCode()),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(PositionInfo)

@@ -1,8 +1,8 @@
 /*
  * @Author: lcj
  * @Date:   2017-08-30 09:31:28
- * @Last Modified by:   lcj
- * @Last Modified time: 2017-09-01 15:45:16
+ * @Last Modified by:   Administrator
+ * @Last Modified time: 2018-07-13 11:16:53
  * @Descriptions: 
  */
 
@@ -19,6 +19,7 @@ import {get,
  * @return {[type]}          [description]
  */
 export const getTeamList = function(params, cb) {
+	console.log(111);
 	/*cb({
 		"error_code": 1000,
 		"data": {

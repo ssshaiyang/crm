@@ -35,7 +35,7 @@ let styles = {
 		fontSize: '15px',
 		letterSpacing: '2px',
 		width: '130px'
-	}
+	},
 }
 
 export class CompanyList extends React.Component {
@@ -45,7 +45,7 @@ export class CompanyList extends React.Component {
 
 	getCompanyList() {
 		return this.props.companies.map(company =>
-			<CompanyDetail key={company.company_id} {...company} />
+			<CompanyDetail style={styles.Companylogo} key={company.company_id} {...company} />
 		)
 	}
 

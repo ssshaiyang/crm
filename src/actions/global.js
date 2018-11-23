@@ -11,6 +11,7 @@ from "../utils/interface.js"
 'use strict';
 
 export const globalChangeCompanyLogined = function(companyLogined, name) {
+    console.log(companyLogined)
     return {
         type: 'GLOBAL_CHANGE_COMPANY_LOGINED',
         payload: {

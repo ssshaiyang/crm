@@ -34,26 +34,42 @@ const data = [{
 
 export class ManufacturerNameOperationModel extends React.Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             delAgentVisible: false,
             addMechInfoVisible: false,
             showMedicineNameVisible: false,
             data: data,
             searchText: '',
-            filtered: false
+            filtered: false,
+            name:this.props.data.manufacturer_name,
+            id:this.props.data.manufacturer_id
         }
     }
 
     componentWillMount() {
+        console.log(this.props.data)
         this.props.getUserInfo(1);
     }
 
     componentWillReceiveProps(nextProps){
-        this.setState({
-            editManuNameCode: nextProps.editManuNameCode
-        })
+       if (nextProps.editManuNameCode == 1000 && this.props.editManuNameCode !== 1000) {
+        let data = {
+            page: -1,
+            limit: 10
+        }
+
+        this.props.getManufacturerNameList(data)
+       }
+              if (nextProps.delManuNameCode == 1000 && this.props.delManuNameCode !== 1000) {
+        let data = {
+            page: -1,
+            limit: 10
+        }
+
+        this.props.getManufacturerNameList(data)
+       }
     }
 
     componentWillUpdate() {
@@ -108,11 +124,12 @@ export class ManufacturerNameOperationModel extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record , index) {
         //console.log('sssssss',record)
         this.setState({
             name: record.manufacturer_name,
             id: record.manufacturer_id,
+            rowclicked:index
         })
     }
 
@@ -161,12 +178,13 @@ export class ManufacturerNameOperationModel extends React.Component {
             if (!err) {
                 //console.log('ssssss', this.props.data.different_manufacturer_name)
                 let editManuName = {
-                    manufacturer_id: this.state.id ? this.state.id : this.props.data.manufacturer_id,
+                    different_manufacturer_id:this.state.different_manufacturer_id,
+                    manufacturer_id: this.state.id ,
                     different_manufacturer_name: values.different_manufacturer_name ? values.different_manufacturer_name : this.props.data.different_manufacturer_name,
-                    different_manufacturer_remark: values.remark,
+                    different_manufacturer_remark: values.different_manufacturer_remark,
                 }
                 let data = {
-                    manufacturer_id: this.props.data.manufacturer_id,
+                    id: this.props.data.different_manufacturer_id,
                     value: editManuName
                 }
                 this.props.editManufacturerInfo(data)
@@ -185,7 +203,7 @@ export class ManufacturerNameOperationModel extends React.Component {
     }
 
     handleOkDelAgent() {
-        this.props.delManufacturerNameInfo(this.props.data.manufacturer_id)
+        this.props.delManufacturerNameInfo(this.props.data.different_manufacturer_id)
         this.setState({
             delAgentVisible: false
         }, () => {
@@ -282,6 +300,7 @@ export class ManufacturerNameOperationModel extends React.Component {
                                     label="标准生产厂家名称"
                                 >
                                     {getFieldDecorator('manufacturer_name', {
+                                        
                                     })(
                                         <div>
                                             <Input style={{ width: 200 }}
@@ -320,7 +339,7 @@ export class ManufacturerNameOperationModel extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>{this.props.userInfo.username}</p>
+                                                <p>{this.props.data.creator_name}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -345,10 +364,10 @@ export class ManufacturerNameOperationModel extends React.Component {
                                     label="备注"
                                 >
                                     {getFieldDecorator('different_manufacturer_remark', {
-
+                                        initialValue:this.props.data.different_manufacturer_remark
                                     })(
                                         <div>
-                                            <input type='textarea' className='my_textarea_style' />
+                                            <input type='textarea' defaultValue={this.props.data.different_manufacturer_remark} className='my_textarea_style' />
                                         </div>
                                         )}
                                 </FormItem>
@@ -375,7 +394,9 @@ export class ManufacturerNameOperationModel extends React.Component {
                         onSearch={this.getMedicineNameSearchValue.bind(this)}
                         style={{ marginBottom: 10 }}
                     />
-                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)} />
+                    <Table columns={columns} dataSource={this.props.rowData.data} onRowClick={this.rowClick.bind(this)}
+                    rowKey
+                    rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''} />
                 </Modal>
 
                 <Modal

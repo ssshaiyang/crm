@@ -3,6 +3,8 @@ import { connect } from 'react-redux'
 import { Card } from 'antd'
 import TopMenu from './medicineNameTop/topMenu.jsx'
 import MedicineNameTableBox from './medicineNameTableBox/medicineNameTableBox.jsx'
+import * as actionCreater from "../../../actions/files/medicineName/medicineName.js";
+
 
 //药品异名
 export class CorporationName extends React.Component {
@@ -22,7 +24,6 @@ export class CorporationName extends React.Component {
 }
 function mapDispatchToProps(dispatch) {
     return {
-
     }
 }
 export default connect(null, mapDispatchToProps)(CorporationName)

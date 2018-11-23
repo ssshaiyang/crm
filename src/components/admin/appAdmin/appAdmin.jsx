@@ -59,7 +59,7 @@ export class AppAdmin extends React.Component {
                                 <Menu.Item key="1" className="mainTabHover">企业已购买</Menu.Item>
                                 <Menu.Item key="2" className="mainTabHover">应用广场</Menu.Item>
                             </Menu>
-                        <Content style={{ marginTop:40 }}>
+                        <Content style={{ marginTop:40}}>
                             <div className="boxOne" style={{display:isShow}}>
                                 <div style={{ background: '#fff', padding: 24}}>
                                     <Row>

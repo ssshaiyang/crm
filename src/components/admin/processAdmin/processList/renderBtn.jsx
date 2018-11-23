@@ -24,6 +24,7 @@ export class RenderCard extends React.Component {
 
     }
     editOpenModal(){
+        this.props.saveMember(this.props.modalDataProps.employee_steps)
         this.props.visibleModal({
             visible:true,
             modifyModal:1
@@ -35,7 +36,7 @@ export class RenderCard extends React.Component {
         })
     }
     deleteOpenModal(){
-
+            console.log(this.props.modalDataProps.rule_id)
     }
 
 
@@ -69,7 +70,8 @@ function mapDispatchToProps(dispatch){
     return{
         visibleModal:(val)=>dispatch(actionCreater.showModal(val)),
         getModalData:(val)=>dispatch(modalDataAction.getAddBranchModal(val)),
-        getModalDataList:(val)=>dispatch(actionCreaterModal.memberList(val))
+        getModalDataList:(val)=>dispatch(actionCreaterModal.memberList(val)),
+        saveMember:(val)=>dispatch(actionCreaterModal.saveIdList(val))
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(RenderCard)

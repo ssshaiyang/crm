@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Icon, Menu, Dropdown, Checkbox, Input, Row, Col, Modal, Form, Table, Cascader, Tree  ,Radio} from 'antd'
+import moment from 'moment'
+import { Button, Icon, Menu, Dropdown, Popconfirm, Checkbox, Input, Row, Col, Modal, Form, Table, Cascader, Tree  ,Radio} from 'antd'
 
 import * as actionCreator from "../../../../actions/files/corporation/corporation.js"
 import * as actionCreater from "../../../../actions/files/agent/agent.js"
@@ -122,7 +123,8 @@ export class AgentTop extends React.Component {
             addContactors: [],
             addBankAccount: [],
             clickedBankInfo:[],
-            employeeName:[]
+            employeeName:[],
+            addBankCount:0
         }
     }
 
@@ -134,9 +136,25 @@ export class AgentTop extends React.Component {
 
     }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.addCode == 1000 && this.props.addCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getAgent(params)
+            console.log("自动刷新")
+        }
+    }
+
     //点击搜索获取输入框输入的值,其中value是输入的参数
     getSearchValue(value) {
-        //console.log('ssss', value)
+        let params = {
+            filter:value,
+            page:-1,
+            limit:10
+        }
+        this.props.getAgent(params)
     }
 
     /**
@@ -167,10 +185,11 @@ export class AgentTop extends React.Component {
     }
 
     获取表格的行元素
-    rowClick(record) {
+    rowClick(record, index) {
         //console.log('sssssss',record)
         this.setState({
-            name: record.name
+            name: record.name,
+            rowclicked: index
         })
     }
     rowClickBankInfo(record) {
@@ -178,7 +197,39 @@ export class AgentTop extends React.Component {
             clickedBankInfo: record
         })
     }
+    rowClickContactInfo(record) {
+        this.setState({
+            contactClickedInfo: record
+        })
+    }
 
+        handleSubmitEditContactsInfo(e) {
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            if (1) {
+                let editContactInfo = {
+                    key: this.state.contactClickedInfo.key,
+                    agent_contact_name:values.agent_contact_name,
+                    agent_contact_telephone:values.agent_contact_telephone,
+                    agent_contact_phone:values.agent_contact_phone,
+                    agent_contact_card:values.agent_contact_card,
+                    agent_contact_fax:values.agent_contact_fax,
+                    agent_contact_webchat:values.agent_contact_webchat,
+                    agent_contact_qq:values.agent_contact_qq,
+                    agent_contact_email:values.agent_contact_email,
+                }
+                let contactorInfo = this.state.addContactors;
+                for (let i = 0; i < contactorInfo.length; i++) {
+                    if (contactorInfo[i].key == editContactInfo.key) {
+                        contactorInfo[i] = editContactInfo
+                    }
+                }
+                this.setState({
+                    addContactors: contactorInfo,
+                })
+            }
+        });
+    }
     /**
      * 计量单位select方法
      */
@@ -192,15 +243,15 @@ export class AgentTop extends React.Component {
     }
 
     //点击表单确认按钮
-    handleSubmit(e) {
-        e.preventDefault();
+    // handleSubmit(e) {
+    //     e.preventDefault();
 
-        this.props.form.validateFields((err, fieldsValue) => {
-            if (err) {
-                return;
-            }
-        });
-    }
+    //     this.props.form.validateFields((err, fieldsValue) => {
+    //         if (err) {
+    //             return;
+    //         }
+    //     });
+    // }
     //招商人员
     //
     showEmployeeInfo() {
@@ -240,6 +291,12 @@ export class AgentTop extends React.Component {
 
     }
 
+    onChange(e) {
+        this.setState({
+            value: e.target.value,
+        });
+    }
+
 
     /**
      * 展开联系人弹框
@@ -255,6 +312,19 @@ export class AgentTop extends React.Component {
             addContactSex: e.target.value
         })
     }
+
+    handleOkManufacturerInfo() {
+        this.setState({
+            updateManuVisible: false
+        })
+    }
+
+    handleCancelManufacturerInfo() {
+        this.setState({
+            updateManuVisible: false
+        })
+    }
+
 
     updateManufacturerInfo() {
         this.setState({
@@ -280,6 +350,8 @@ export class AgentTop extends React.Component {
         })
     }
 
+
+
     getContactsInfoSearchValue(value) {
         //console.log('ssssss',value)
     }
@@ -295,6 +367,7 @@ export class AgentTop extends React.Component {
             if (1==1) {
                 console.log(values)
                 let data = {
+                    key: this.state.addBankCount,
                     agent_account_user: values.agent_account_user,
                     agent_account_name: values.agent_account_name,
                     agent_bank_account: values.agent_bank_account
@@ -302,11 +375,47 @@ export class AgentTop extends React.Component {
                 addBankAccountList.push(data);
                 
                 this.setState({
+                    addBankCount:this.state.addBankCount + 1,
                     addBankAccount: addBankAccountList
                 })
                 console.log(this.state.addBankAccount)
             }
         });
+    }
+
+        //编辑银行账户确定按钮
+    handleSubmitEditBankInfo(e) {
+        e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+
+            if (1) {
+                let editBankInfo = {
+                    key: this.state.clickedBankInfo.key,
+                    agent_bank_account: values.agent_bank_account,
+                    agent_account_name: values.agent_account_name,
+                    agent_account_user: values.agent_account_user
+                }
+                let bankAccountInfo = this.state.addBankAccount;
+                for (let i = 0; i < bankAccountInfo.length; i++) {
+                    if (bankAccountInfo[i].key == editBankInfo.key) {
+                        bankAccountInfo[i] = editBankInfo
+                    }
+                }
+                this.setState({
+                    addBankAccount: bankAccountInfo,
+                })
+            }
+        });
+    }
+
+    delBankInfo(key) {
+        const addBankAccount = [...this.state.addBankAccount];
+        this.setState({ 
+            addBankAccount: addBankAccount.filter(item => item.key !== key) 
+        });
+        // this.setState({
+        //     delManufacturerVisible: true
+        // })
     }
 
     //添加联系人确定按钮
@@ -318,7 +427,7 @@ export class AgentTop extends React.Component {
             console.log(err);
             if (1==1) {
                 let addContactors = {
-                    key: values.deliver_contact_phone,
+                    key: this.state.addContactCount,
                     agent_contact_name: values.agent_contact_name,
                     agent_contact_telephone: values.agent_contact_telephone,
                     agent_contact_sex: this.state.addContactSex,
@@ -332,9 +441,34 @@ export class AgentTop extends React.Component {
                 }
                 addContactList.push(addContactors);
                 this.setState({
+                    addContactCount:this.state.addContactCount +1,
                     addContactors: addContactList
                 })
             }
+        });
+    }
+
+    updateBankInfo(){
+        this.setState({
+            editBankInfoVisible:true
+        })
+    }
+
+    handleOkEditCompBankInfo(){
+        this.setState({
+            editBankInfoVisible:false
+        })
+    }
+    handleCancelEditCompBankInfo(){
+        this.setState({
+            editBankInfoVisible:false
+        })
+    }
+
+    delContactInfo(key) {
+        const addContactors = [...this.state.addContactors];
+        this.setState({ 
+            addContactors: addContactors.filter(item => item.key !== key) 
         });
     }
 
@@ -351,7 +485,7 @@ export class AgentTop extends React.Component {
                     agent_address: fieldsValue.agent_address,
                     agent_remark: fieldsValue.agent_remark,
                     agent_account: this.state.addBankAccount,
-                    agent_contact:this.state.addContactors  
+                    agent_contact:this.state.addContactors,
                 }
                 this.props.addAgent(addAgent);
                 console.log(addAgent)
@@ -495,9 +629,9 @@ export class AgentTop extends React.Component {
             <div>
                 <Row>
                     <Col span={3}>
-                        <Dropdown overlay={menu} trigger={['click']}>
+                        {/*<Dropdown overlay={menu} trigger={['click']}>
                             <Button className='mainButton'><Icon type="menu-unfold" /></Button>
-                        </Dropdown>
+                        </Dropdown>*/}
                     </Col>
                     <Col span={9}></Col>
                     <Col span={8}>
@@ -546,6 +680,7 @@ export class AgentTop extends React.Component {
                                         rules: [{
                                             required: true, message: '请输入招商人员',
                                         }],
+                                        
                                     })(
                                         <div>
                                             <Input style={{ width: 200 }}
@@ -557,22 +692,22 @@ export class AgentTop extends React.Component {
                                         )}
                                 </FormItem>
                             </Col>
-                             <Col span={11}>
+                             <Col span={15}>
                                 <FormItem
                                     {...formItemLayout1}
                                     label="所属地区"
                                 >
-                                    {getFieldDecorator('agent_', {
+                                    {getFieldDecorator('agent_area', {
 
                                     })(
                                         <div>
-                                            <Cascader options={this.props.areaInfo} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" style={{ width: 300 }} />
+                                            <Cascader options={this.props.areaInfo} onChange={this.selectArea.bind(this)} placeholder="请选择所属地区" style={{ width: 250 }} />
                                         </div>
                                         )}
                                 </FormItem>
                             </Col>
                             <Col span={2}></Col>
-                            <Col span={11}></Col>
+                            <Col span={7}></Col>
                             <Col span={24}>
                                 <FormItem
                                     {...formItemLayout1}
@@ -589,8 +724,7 @@ export class AgentTop extends React.Component {
                             </Col>
                         </Row>
                         <br />
-                        {/* 第二层 */}
-                        <div className='botLine'>
+                         <div className='botLine'>
                             <FormItem
                                 {...formItemLayout1}
                                 label="联系人信息"
@@ -604,7 +738,7 @@ export class AgentTop extends React.Component {
                                     </div>
                                     )}
                             </FormItem>
-                            <Table dataSource={this.state.addContactors ? this.state.addContactors : []} bordered={true} onRowClick={this.rowClick.bind(this)}>
+                            <Table dataSource={this.state.addContactors ? this.state.addContactors : []} bordered={true} onRowClick={this.rowClickContactInfo.bind(this)}>
                                 <Column
                                     title="姓名"
                                     dataIndex="agent_contact_name"
@@ -653,11 +787,14 @@ export class AgentTop extends React.Component {
                                 <Column
                                     title="操作"
                                     key="operation"
-                                    render={() => (
+                                    render={(text, record, index) => (
                                         <div>
                                             <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
-                                                onClick={this.updateManufacturerInfo.bind(this)}><Icon type="edit" /></span>
-                                            <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={this.delManufacturerInfo.bind(this)}><Icon type="delete" /></span>
+                                                onClick={() =>this.updateManufacturerInfo(record)}><Icon type="edit" /></span>
+                                            <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delContactInfo(record.key)}>
+                                               <Icon type="file-excel" />
+                                            </Popconfirm>   
+                                            
                                         </div>
                                     )}
                                 />
@@ -706,10 +843,14 @@ export class AgentTop extends React.Component {
                                         <Column
                                             title="操作"
                                             key="operation"
-                                            render={() => (
+                                            render={(text, record, index) => (
                                                 <div>
-                                                    <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}><Icon type="edit" /></span>
-                                                    <span style={{ fontSize: 16, cursor: 'pointer' }}><Icon type="file-excel" /></span>
+                                                    <span style={{ fontSize: 16, marginRight: 10, cursor: 'pointer' }}
+                                                        onClick={() =>this.updateBankInfo(record)}><Icon type="edit" /></span>
+                                                    <Popconfirm title="确定要删除此条的信息吗" onConfirm={() =>this.delBankInfo(record.key)}>
+                                                       <Icon type="file-excel" />
+                                                    </Popconfirm>   
+                                                    
                                                 </div>
                                             )}
                                         />
@@ -745,7 +886,7 @@ export class AgentTop extends React.Component {
 
                                         })(
                                             <div>
-                                                <p>2017-05-25</p>
+                                                <p>{new Date().toLocaleDateString()}</p>
                                             </div>
                                             )}
                                     </FormItem>
@@ -899,6 +1040,136 @@ export class AgentTop extends React.Component {
                     </Form>
                 </Modal>
 
+                <Modal
+                    title='修改联系人信息'
+                    visible={this.state.updateManuVisible}
+                    footer={null}
+                    closable={false}
+                >
+                    {/* <Search
+                        placeholder="输入客户ID/姓名/联系方式"
+                        onSearch={this.getContactsInfoSearchValue.bind(this)}
+                        style={{ marginBottom: 10 }}
+                    /> */}
+                    <Form onSubmit={this.handleSubmitEditContactsInfo.bind(this)}>
+                        {/*第一层*/}
+                        <div className="botLine">
+                            <FormItem
+                                {...formItemLayout}
+                                label="姓名"
+                            >
+                                {getFieldDecorator('agent_contact_name',{
+                                    rules:[{
+                                        required:true
+                                    }]
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_name : ''} style={{width:200}}/>
+                                    </div>  
+                                )}
+                            </FormItem> 
+                            <FormItem
+                                {...formItemLayout}
+                                label="手机"
+                            >
+                                {getFieldDecorator('agent_contact_telephone',{
+                                    rules:[{
+                                        required:true
+                                    }]
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_telephone : ''} style={{width:200}}/>
+                                    </div>  
+                                )}
+                            </FormItem> 
+                            <div style={{ marginBottom: 20 }}>
+                                <span style={{ marginLeft: 120 }}>性别:</span>
+                                <RadioGroup onChange={this.addContactSex.bind(this)} style={{ marginBottom: 20, marginLeft: 40 }}>
+                                    <Radio value={1}>男</Radio>
+                                    <Radio value={0}>女</Radio>
+                                </RadioGroup>
+                            </div>      
+                        </div>
+                        <br/>
+                            <div className='botLine'>
+                            <FormItem
+                                {...formItemLayout}
+                                label="固定电话"
+                            >
+                                {getFieldDecorator('agent_contact_phone', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_phone : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="身份证号"
+                            >
+                                {getFieldDecorator('agent_contact_card', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_card : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="传真"
+                            >
+                                {getFieldDecorator('agent_contact_fax', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_fax : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="微信"
+                            >
+                                {getFieldDecorator('agent_contact_webchat', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_webchat : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="QQ"
+                            >
+                                {getFieldDecorator('agent_contact_qq', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_qq : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="邮箱"
+                            >
+                                {getFieldDecorator('agent_contact_email', {
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.contactClickedInfo ? this.state.contactClickedInfo.agent_contact_email : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                        </div>
+                        <br />
+                        <Button type="primary" htmlType="submit" className="login-form-button" style={{ marginTop: 10, marginLeft: 350, marginRight: 10 }}
+                            onClick={this.handleOkManufacturerInfo.bind(this)}>
+                            确定
+                        </Button>
+                        <Button type="primary" className="login-form-button" onClick={this.handleCancelManufacturerInfo.bind(this)}>
+                            退出
+                        </Button>
+                    </Form>
+                </Modal>
+
 
                 <Modal
                     title='添加银行账户'
@@ -919,7 +1190,7 @@ export class AgentTop extends React.Component {
                                     }]
                                 })(
                                     <div>
-                                        <Input style={{ width: 200 }} />
+                                        <Input  style={{ width: 200 }} />
                                     </div>
                                     )}
                             </FormItem>
@@ -957,6 +1228,67 @@ export class AgentTop extends React.Component {
                             确定
                         </Button>
                         <Button type="primary" className="login-form-button" onClick={this.handleCancelCompBankInfo.bind(this)}>
+                            退出
+                        </Button>
+                    </Form>
+                </Modal>
+                <Modal
+                    title='修改银行账户'
+                    visible={this.state.editBankInfoVisible}
+                    footer={null}
+                    closable={true}
+                >
+                    <Form onSubmit={this.handleSubmitEditBankInfo.bind(this)}>
+                        {/* 第一层 */}
+                        <div className='botLine'>
+                            <FormItem
+                                {...formItemLayout}
+                                label="账号"
+                            >
+                                {getFieldDecorator('agent_bank_account', {
+                                    rules:[{
+                                        required:true
+                                    }]
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.agent_bank_account : ''}  style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="开户行"
+                            >
+                                {getFieldDecorator('agent_account_name', {
+                                    rules:[{
+                                        required:true
+                                    }]
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.agent_account_name : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                            <FormItem
+                                {...formItemLayout}
+                                label="开户名"
+                            >
+                                {getFieldDecorator('agent_account_user', {
+                                    rules:[{
+                                        required:true
+                                    }]
+                                })(
+                                    <div>
+                                        <Input defaultValue={this.state.clickedBankInfo ? this.state.clickedBankInfo.agent_account_user : ''} style={{ width: 200 }} />
+                                    </div>
+                                    )}
+                            </FormItem>
+                        </div>
+                        <Button type="primary" htmlType="submit" className="login-form-button" style={{ marginTop: 10, marginLeft: 350, marginRight: 10 }}
+                            onClick={this.handleOkEditCompBankInfo.bind(this)}>
+                            确定
+                        </Button>
+                        <Button type="primary" className="login-form-button" onClick={this.handleCancelEditCompBankInfo.bind(this)}>
                             退出
                         </Button>
                     </Form>
@@ -1015,7 +1347,9 @@ export class AgentTop extends React.Component {
                                 onSearch={this.getEmployeeSearchValue.bind(this)}
                                 style={{ marginBottom: 10 }}
                             />
-                            <Table columns={columns} dataSource={this.state.data} onRowClick={this.rowClick.bind(this)} />
+                            <Table columns={columns} dataSource={this.state.data} onRowClick={this.rowClick.bind(this)} 
+                            rowKey
+                            rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/>
                         </Col>
                     </Row>
                 </Modal>
@@ -1025,12 +1359,12 @@ export class AgentTop extends React.Component {
 }
 
 function mapStateToProps(state) {
-    console.log(state)
     return {
          //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
         areaInfo:state.corporationInfo.areaInfo,
-        employeeInfo:state.agentInfo.employeeInfo.data
+        employeeInfo:state.agentInfo.employeeInfo.data,
+        addCode:state.agentInfo.addAgentCode
     }
 }
 
@@ -1039,7 +1373,7 @@ function mapDispatchToProps(dispatch) {
         //获取招商人员列表
         getEmployee:(params) => dispatch(actionCreator.getEmployeeInfo(params)),
         getArea: (params) => dispatch(actionCreator.getAreaInfo(params)),
-        getUserInfo: (param) => dispatch(actionCreator.getUser(param)),
+        
         // //获取所属地区
         // getArea: () => dispatch(actionCreater.getAreaInfo()),
         //添加代理商

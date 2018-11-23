@@ -116,7 +116,7 @@ export class MaterialModal extends React.Component {
 					// material_date: moment(data.meeting_date * 1000),
 					material_name: data.material_name,
 					apply_number: data.apply_number,
-					hospital_id: data.hospital_id,
+					hospital_id: this.state.hospitalOptions[data.hospital_id],
 					hospital_name_filter: data.hospital_name_filter,
 					apply_description: data.apply_description
 				})
@@ -143,10 +143,11 @@ export class MaterialModal extends React.Component {
 				if (modalType === 0) {
 					addMaterial(values, cb.bind(this))
 				} else if (modalType === 1) {
-					values.material_apply_id = this.props.data.material_apply_id;
+					console.log(this.props)
+					values.material_apply_id = this.props.data.id;
 					editMaterial(values, cb.bind(this))
 				} else {
-					values.material_apply_id = this.props.data.material_apply_id;
+					values.material_apply_id = this.props.id;
 					reMaterial(values, cb.bind(this))
 				}
 			}

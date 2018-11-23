@@ -12,7 +12,7 @@ export class Medicine extends React.Component {
     render() {
         return (
             <div style={{ padding: "35px 0" }}>
-                <Card title='已归档'>
+                <Card title='药品'>
                     <DropDownMenu/>
                     <MedicineTableBox/>
                 </Card>

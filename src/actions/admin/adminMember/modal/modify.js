@@ -81,7 +81,6 @@ export const memberListEdit=function(employeeId , api ){
  export const getBranchSelects= function() {
      return (dispatch) => {
          function cb(res) {
-             console.log('branch',res)
              if (res.error_code === GLOBALSUCCESS) {
                  let action = {
                      type: 'ADMIN_MEMBER_GET_DEVELOPMENT_OPTIONS',

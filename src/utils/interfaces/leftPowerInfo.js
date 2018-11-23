@@ -21,9 +21,22 @@ export const getAllPowerListInfo = function (params, cb) {
     //     },
     //     false, params);
     // get('/departments/'+params.department_leader_id, params, cb);
-    get('/departments/', params, cb);
+    get('/roles', params, cb);
 }
 
+//添加角色权限
+export const postAllPowerListInfo = function (prams, cb) {
+    post('/roles', prams, cb);
+}
+
+export const putAllPowerListInfo = function (prams, cb) {
+    let params={
+        role_name:prams.role_name,
+        role_description:prams.role_description,
+        permission_ids:prams.permission_ids,
+    }
+    put('/roles/'+prams.role_id, params,cb);
+}
 //获取角色信息列表
 export const getHasPowerListInfo = function (params, cb) {
     // cb(
@@ -79,9 +92,14 @@ export const getClickRolePowerInfo = function (params, cb) {
     //         }]
     //     },
     //     false, params);
-    get('/permissions/:role_id/chooses'+params, params, cb);
+    get('/permissions/'+params+'/chooses',null, cb);
 }
 
+// 删除角色
+export const delPowerList = function (params, cb) {
+
+    del('/roles/'+params,null, cb);
+}
 //获取权限分类
 export const getAllPowerClassificationInfo = function (params, cb) {
     // cb(
@@ -115,7 +133,8 @@ export const getClickPowerListInfo = function (params, cb) {
     //         }]
     //     },
     //     false, params);
-    get('/permissions/'+params, params, cb);
+    console.log(params)
+    get('/permissions/'+params, null, cb);
 }
 
 //获取选中的人员列表
@@ -133,7 +152,7 @@ export const getRoleMemberListInfo = function (params, cb) {
     //         }]
     //     },
     //     false, params);
-    get('/permissions/'+params, params, cb);
+    get('/roles/'+params+'/employees',null, cb);
 }
 
 //添加角色人员
@@ -144,7 +163,7 @@ export const addMemberListInfo = function (params, cb) {
     //         "data": true
     //     },
     //     false, params);
-    post('/roles/:'+params+'/employees', params, cb);
+    post('/roles/'+params.checkId+'/employees', params, cb);
 }
 
 export const getAllMemberListInfo = function (params, cb) {
@@ -193,7 +212,12 @@ export const getAllMemberListInfo = function (params, cb) {
     get('/employees', params, cb);
 }
 
-//添加角色人员
+// 删除人员
+export const delAllMemberListInfo = function (params, cb) {
+    console.log(params)
+    del('/roles/'+params.role_id+'/employees', params, cb);
+}
+//获取选择的应用列表
 export const getRoleApplyListInfo = function (params, cb) {
     // cb(
     //     {
@@ -206,6 +230,6 @@ export const getRoleApplyListInfo = function (params, cb) {
     //         }]
     //       }     ,
     //     false, params);
-    get('/employees/appliances', params, cb);
+    get('/appliances/roles/'+params. role_id+'/appliances',null, cb);
 }
 

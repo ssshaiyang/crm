@@ -1,9 +1,11 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {Card,Select,Form,Row,Col,Button} from 'antd'
+import {Card,Select,Form,Row,Col,Button,message} from 'antd'
 import * as actionCreater from "../../../../actions/admin/processAdmin/processAdminTop/processType.js"
 const Option = Select.Option;
 import AddRuleModal from '../modal/addRuleModal.jsx'
+import * as actionCreaterList from "../../../../actions/admin/processAdmin/processList/processList";
+import * as actionCreaterModal from "../../../../actions/admin/processAdmin/modal/addRuleModal";
 const formItemLayout = {
     labelCol: {
         xs: {
@@ -41,6 +43,12 @@ const rowItemLayout = {
     },
 }
 export class ProcessFrom extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            role_id:1
+        }
+    }
     componentWillMount(){
 
     }
@@ -73,10 +81,25 @@ export class ProcessFrom extends React.Component {
         return result
     }
     openModal(){
-        this.props.visibleModal({
-            visible:true,
-            modalType:0
+        if(this.props.formDataList.length >0 ){
+            message.info('已经有规则，请删除后进行添加')
+        }else{
+            this.props.visibleModal({
+                visible:true,
+                modalType:0,
+            })
+            this.props.getModalDataList({
+                limit:5,
+                page:1
+            })
+            this.props.getUpdateList()
+        }
+    }
+    selectChange(value){
+        this.setState({
+            role_id:value
         })
+        this.props.getProcessListData(value)
     }
     render(){
         const {
@@ -95,7 +118,7 @@ export class ProcessFrom extends React.Component {
                                 rules={
                                     [{ required: true, message:"选择类型"}]
                                 }>
-                                <Select style={{width:"200px"}}>
+                                <Select style={{width:"200px"}} onChange={this.selectChange.bind(this)}>
                                     {this.makeOptions(this.makeRoles(this.props.processTypeList))}
                                 </Select>
                             </FormItem>
@@ -164,14 +187,19 @@ function onFieldsChange(props,changedFields){
 function mapStateToProps(state){
     //console.log('sdsds',state.processAdminTop.selected)
     return{
+        formDataList:state.getProcessAdminList.data,
       processTypeList:state.processAdminTop.data,
       data:state.processAdminTop.selected
     }
 }
 function mapDispatchToProps(dispatch){
     return{
+        getModalDataList:(val)=>dispatch(actionCreaterModal.memberList(val)),
         completeInf:(fields)=>dispatch(actionCreater.completeMemberInf(fields)),
-        visibleModal:(val)=>dispatch(actionCreater.showModal(val))
+        visibleModal:(val)=>dispatch(actionCreater.showModal(val)),
+        getProcessListData:(val)=>dispatch(actionCreaterList.getProcessData(val)),
+        // 清空修改遗留数据
+        getUpdateList:()=>dispatch(actionCreaterModal.updateData())
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps)(ProcessAdminTop)

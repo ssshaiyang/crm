@@ -26,7 +26,7 @@ export default function filter(state, action) {
 			break;
 		case 'APPROVAL_FILTER_CALCEL_FILTER':
 			newState = {
-				approvalStatus: 0,
+				approvalStatus: -1,
 				startTime: null,
 				endTime: null,
 				filter: null

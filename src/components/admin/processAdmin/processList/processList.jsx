@@ -27,6 +27,7 @@ export class ProcessAdminList extends React.Component {
 
 function mapStateToProps(state){
     return{
+        code:state.addRulesModal.code,
         data:state.getProcessAdminList.data,
     }
 }

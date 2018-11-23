@@ -27,7 +27,26 @@ export class HospitalNameOperation extends React.Component {
     }
 
     componentWillMount() {
+        console.log(this.props.data)
+    }
 
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.editCode == 1000 && this.props.editCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDiffHospital(params)
+            console.log("自动刷新")
+        }
+         if (nextProps.delCode == 1000 && this.props.delCode !== 1000) {
+            let params = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDiffHospital(params)
+            console.log("自动刷新")
+        }
     }
 
     //点击搜索获取输入框输入的值,其中value是输入的参数
@@ -70,10 +89,11 @@ export class HospitalNameOperation extends React.Component {
     }
 
     //获取表格的行元素
-    rowClick(record) {
+    rowClick(record, index) {
         this.setState({
             hospital_name: record.hospital_name,
-            hospital_id: record.hospital_id
+            hospital_id: record.hospital_id ,
+            rowclicked: index
         })
     }
 
@@ -93,11 +113,16 @@ export class HospitalNameOperation extends React.Component {
         this.setState({
             delAgentVisible: false
         })
+        let params = {
+            page: -1,
+            limit: 10
+        }
+        this.props.getDiffHospital(params)
     }
 
     handleCancelDelAgent() {
         this.setState({
-            agentModelVisible: false
+            delAgentVisible: false
         })
     }
 
@@ -117,8 +142,15 @@ export class HospitalNameOperation extends React.Component {
                 }
                 this.props.editDiffHispitalName(params);
             }
+            
+            let param = {
+                page: -1,
+                limit: 10
+            }
+            this.props.getDiffHospital(param)
         });
     }
+
 
     /**
      * 控制弹出医院信息按钮
@@ -294,7 +326,7 @@ export class HospitalNameOperation extends React.Component {
                     onCancel={this.handleCancelMedicineInfo.bind(this)}
                 >
                     <Row>
-                        <Col span={11}>
+                        {/*<Col span={11}>
                             <Search
                                 placeholder="输入地区"
                                 onSearch={this.getMedicineNameSearchValue.bind(this)}
@@ -319,14 +351,16 @@ export class HospitalNameOperation extends React.Component {
                                 </TreeNode>
                             </Tree>
                         </Col>
-                        <Col span={1}></Col>
-                        <Col span={12}>
+                        <Col span={1}></Col>*/}
+                        <Col span={24}>
                             <Search
                                 placeholder="输入客户ID/姓名/联系方式"
                                 onSearch={this.getMedicineNameSearchValue.bind(this)}
                                 style={{ marginBottom: 10 }}
                             />
-                            <Table rowKey='key' columns={columns} dataSource={this.props.rowData ? this.props.rowData.data : []} onRowClick={this.rowClick.bind(this)} />
+                            <Table rowKey='key' columns={columns} dataSource={this.props.rowData ? this.props.rowData.data : []} 
+                            onRowClick={this.rowClick.bind(this)}  rowKey
+                            rowClassName={(record, index) => index   === this.state.rowclicked ? "antTableRowClick" : ''}/>
                         </Col>
                     </Row>
                 </Modal>
@@ -355,12 +389,16 @@ function mapStateToProps(state) {
         rowData: state.hospitalInfo.data,
         //获取用户信息
         userInfo: state.drugNameListInfo.userInfo,
+        editCode:state.drugNameListInfo.editDiffHispitalCode,
+        delCode:state.drugNameListInfo.delDiffHispitalCode
     }
 }
 function mapDispatchToProps(dispatch) {
     return {
         //获取所属地区
         getArea: () => dispatch(actionArea.getAreaInfo()),
+         //获取医院异名
+        getDiffHospital: (params) => dispatch(actionCreator.getDiffHospitalInfo(params)),
         //获取医院列表
         getHospital: (params) => dispatch(actionCreater.getHospitalInfo(params)),
         //编辑医院异名

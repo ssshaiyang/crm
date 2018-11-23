@@ -35,7 +35,7 @@ export class frameWork extends React.Component {
         return (
             <div style={{ padding: "35px 0" }}>
                 <Card
-                    title="组织框架"
+                    title="组织架构"
                     extra={<AddBranch />}
                 >
                     {/* <div style={styles.flexbox}>
@@ -47,9 +47,9 @@ export class frameWork extends React.Component {
                             </div>
                         </div> */}
                     <Row>
-                        <Col span={10}><LeftBox /></Col>
-                        <Col span={1}></Col>
-                        <Col span={13}><RightBox refresh={this.props.getGridMemberList} /></Col>
+                        <Col span={24}><LeftBox /></Col>
+                        {/*<Col span={1}></Col>*/}
+                        {/*<Col span={13}><RightBox refresh={this.props.getGridMemberList} /></Col>*/}
                     </Row>
                 </Card>
             </div>

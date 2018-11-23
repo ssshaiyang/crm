@@ -1,40 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Card, Button, Table, Modal, Input, Row, Col, Form, Icon, Checkbox, Transfer } from 'antd'
+import { Card, Button, Table, Modal, Input, Row, Col, Form, Icon, Checkbox, Transfer} from 'antd'
 import * as actionCreator from "../../../../actions/admin/power/leftPowerInfo.js";
 const FormItem = Form.Item;
 const CheckboxGroup = Checkbox.Group;
-const columns = [{
-    title: 'Name',
+const columns = [ {
+    title: '权限ID',
+    dataIndex: 'key',
+}, {
+    title: '权限名称',
     dataIndex: 'name',
-    render: text => <a href="#">{text}</a>,
-}, {
-    title: 'Age',
-    dataIndex: 'age',
-}, {
-    title: 'Address',
-    dataIndex: 'address',
-}];
-const data = [{
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-}, {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-}, {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sidney No. 1 Lake Park',
-}, {
-    key: '4',
-    name: 'Disabled User',
-    age: 99,
-    address: 'Sidney No. 1 Lake Park',
 }];
 
 // rowSelection object indicates the need for row selection
@@ -53,13 +28,20 @@ export class LeftPowerInfo extends React.Component {
     constructor() {
         super();
         this.state = {
-            upateVisible: false,
+            updateVisible: false,
             addRoleVisible: false,
             addPowerVisible: false,
             indeterminate: true,
             checkAll: false,
             mockData: [],
             targetKeys: [],
+            data:[],
+            power_id:-1,
+            power_ids:[],
+            power_list:[],
+            power_arr:[],
+            power_children:[],
+            changeData:[]
         }
     }
 
@@ -74,45 +56,93 @@ export class LeftPowerInfo extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
+        this.setState({
+            addRoleVisible: false,
+            updateVisible:false
+        })
+        let dataRoleList =[];
         this.props.form.validateFields((err, values) => {
             if (!err) {
+                dataRoleList =values;
                 console.log('Received values of form: ', values);
             }
         });
+        let idsList =this.state.power_children;
+        let idLists ="";
+        for(let j=0;j<this.state.power_list.length;j++){
+            if(j==0){
+                idLists=""+this.state.power_list[j];
+            }else{
+                idLists=idLists+","+this.state.power_list[j];
+            }
+        }
+        for(let i =0;i<idsList.length;i++){
+            idLists= idLists+","+idsList[i]
+        }
+
+        let formroledata={
+            role_name:dataRoleList.role_name,
+            role_description:dataRoleList.role_detail,
+            permission_ids:idLists
+        }
+        // this.props.postPowerList(formroledata)
     }
 
-    updateShowModal(key) {
+
+
+    updateShowModal(keyId,name,parentName) {
         this.setState({
-            upateVisible: true,
+            changeData: {
+                keyId : keyId,
+                role_name : name,
+                parentName : parentName
+            }
+        })
+        const role_id = {
+            role_id: keyId,
+            role_name: name,
+        }
+        this.props.getRolePower(role_id);
+        this.setState({
+            updateData:params,
+            updateVisible: true,
         });
     }
     handleOkUpdate(e) {
+        console.log(this.state)
         this.setState({
-            upateVisible: false,
+            updateVisible: false,
         });
     }
     handleCancelUpdate(e) {
         this.setState({
-            upateVisible: false,
+            updateVisible: false,
         });
     }
 
     addRole() {
-        this.props.hasPowerList();
+        // this.props.hasPowerList();
         this.setState({
+            checkCode:0,
+            data:[],
+            change_data:[],
+            checkedList:[],
             addRoleVisible: true
         })
     }
 
     addPower() {
+        console.log(this.state.power_children)
         this.props.getPowerClassification();
         this.setState({
             addPowerVisible: true,
-            addRoleVisible: false
+            // addRoleVisible: false
         })
     }
 
-    handleOkAdd() {
+    handleOkAdd(e) {
+        console.log(this.state)
+        console.log("测试")
         this.setState({
             addRoleVisible: false
         })
@@ -120,7 +150,8 @@ export class LeftPowerInfo extends React.Component {
 
     handleCancelAdd() {
         this.setState({
-            addRoleVisible: false
+            addRoleVisible: false,
+            upateVisible:false
         })
     }
 
@@ -133,7 +164,18 @@ export class LeftPowerInfo extends React.Component {
     }
 
     handleOkAddPower() {
+        let arr =this.state.power_children;
+        let checkList =this.state.checkedList;
+        let ars =[]
+        for(let i =0;i<arr.length;i++){
+                let pushData ={
+                    key:""+arr[i],
+                    name:''+checkList[i]
+                }
+                ars.push(pushData)
+        }
         this.setState({
+            data:ars,
             addPowerVisible: false
         })
     }
@@ -143,7 +185,9 @@ export class LeftPowerInfo extends React.Component {
             addPowerVisible: false
         })
     }
-
+    delData(e){
+        console.log(e)
+    }
     //遍历渲染权限分类
     powerClassification(data) {
         if (data.length > 0) {
@@ -157,11 +201,58 @@ export class LeftPowerInfo extends React.Component {
 
     //复选框选中打钩
     onChange(checkedList) {
+        let clickPower =this.props.clickedPower;
+        let arrS=[];
+        let parent_id=this.state.power_id;
+        let powerList = this.state.power_list;
+        let powerChildren =this.state.power_children;
+        let checkCode=0;
+        if(checkedList.length>0){
+            if(powerList.indexOf(parent_id) ==-1){
+                console.log("没有这个值")
+                powerList.push(parent_id)
+            }
+            for(let i =0;i<checkedList.length;i++){
+                for(let j =0;j<clickPower.length;j++){
+                    if(checkedList[i]==clickPower[j].permission_name){
+                        if(this.state.power_children.indexOf(clickPower[j].permission_id) ==-1){
+                            powerChildren.push(clickPower[j].permission_id)
+                            checkCode=1;
+                        }
+                        arrS.push(j)
+                    }
+                }
+            }
+        }
+        if(checkCode==0){
+            if(powerList.indexOf(parent_id) !=-1){
+                powerList.splice(powerList.indexOf(parent_id),1)
+            }
+        }
+        let arrList =[]
+        for(let i =0;i<clickPower.length;i++){
+            arrList.push(i)
+        }
+        for(let i =0;i<arrS.length;i++){
+            for(let j=0;j<arrList.length;j++){
+                if(arrS[i]==arrList[j]){
+                    arrList.splice(arrList.indexOf(arrS[i]),1)
+                }
+            }
+        }
+        for(let i =0;i<arrList.length;i++){
+            if(powerChildren.indexOf(clickPower[arrList[i]].permission_id) !=-1){
+                powerChildren.splice(powerChildren.indexOf(clickPower[arrList[i]].permission_id),1)
+            }
+        }
         this.setState({
             checkedList,
             indeterminate: !!checkedList.length && (checkedList.length < this.props.clickedPower.length),
             checkAll: checkedList.length === this.props.clickedPower.length,
+            power_list:powerList,
+            power_children:powerChildren
         });
+        console.log(powerList)
     }
     //点击全选
     onCheckAllChange(e) {
@@ -180,7 +271,10 @@ export class LeftPowerInfo extends React.Component {
 
     //点击权限分类获取对应权限
     clickPower(power_id) {
-        this.props.getClickPower();
+        this.setState({
+            power_id:power_id,
+        })
+        this.props.getClickPower(power_id);
     }
 
     //渲染显示点击选中的权限列表
@@ -196,64 +290,79 @@ export class LeftPowerInfo extends React.Component {
         }
     }
 
-    /**
-     * 穿梭框方法
-     */
-    // getMock(){
-    //     const targetKeys = [];
-    //     const mockData = [];
-    //     let power_names = [];
-    //     if (this.props.clickedPower.length > 0) {
-    //         for (let i = 0; i < this.props.clickedPower.length; i++) {
-    //             power_names.push(this.props.clickedPower[i].permission_name);
-    //         }
-    //     }
-    //     for (let i = 0; i < 20; i++) {
-    //         const data = {
-    //             key: i.toString(),
-    //             title: `content${i + 1}`,
-    //             description: `description of content${i + 1}`,
-    //             chosen: Math.random() * 2 > 1,
-    //         };
-    //         if (data.chosen) {
-    //             targetKeys.push(data.key);
-    //         }
-    //         mockData.push(data);
-    //     }
-    //     for(let i=0;i<power_names;i++){
-    //         const data={
-    //             key:i.toString(),
-    //             title:power_names
-    //         }
-    //         mockData.push(data);
-    //     }
-    //     this.setState({ mockData});
-    // }
-
-    // handleChange(targetKeys, direction, moveKeys){
-    //     console.log('sssss',targetKeys, direction, moveKeys);
-    //     this.setState({ targetKeys });
-    // }
-
-    // renderItem(item){
-    //     const customLabel = (
-    //         <span className="custom-item">
-    //             {item.title}
-    //         </span>
-    //     );
-
-    //     return {
-    //         label: customLabel,  // for displayed item
-    //         value: item.title,   // for title and filter matching
-    //     };
-    // }
 
     addPowerInfo() {
 
     }
+    offBtn(){
+        this.setState({
+            updateVisible: false,
+            addRoleVisible:false
+        });
+    }
+    delShowModal(val){
+        this.props.delPowerList(val)
+    }
+
+    makeListData(data){
+        console.log(data)
+        let arrS=[]
+        for(let i=0;i<data.length;i++){
+            if(data[i].children.length>0){
+                for(let j=0;j<data[i].children.length;j++){
+                    const arr={
+                        key:""+data[i].children[j].permission_id,
+                        name:''+data[i].children[j].permission_name
+                    }
+                    arrS.push(arr)
+                }
+            }
+        }
+        this.setState({
+            data:arrS,
+        })
+        console.log(arrs)
+    }
 
     render() {
+        if(this.props.code==GLOBALSUCCESS){
+            this.props.getPowerList();
+        }
+        if(this.props.updateCodeData == 1000){
+            this.props.getRolePower(this.state.updateData)
+        }
+        if(this.props.clickRoleCode==GLOBALSUCCESS){
+            let arrS =[];
+            let arrText=[];
+            let parentIds=[];
+            let powerChildren=[];
+            console.log(this.props.clickRolePower)
+            for(let i =0;i<this.props.clickRolePower.length;i++){
+                parentIds.push(this.props.clickRolePower[i].permission_id)
+                if(this.props.clickRolePower[i].children.length>0){
+                    for(let j=0;j<this.props.clickRolePower[i].children.length;j++){
+                        let arr ={
+                            key:""+this.props.clickRolePower[i].children[j].permission_id,
+                            name:''+this.props.clickRolePower[i].children[j].permission_name
+                        }
+                        powerChildren.push(this.props.clickRolePower[i].children[j].permission_id)
+                        arrText.push(this.props.clickRolePower[i].children[j].permission_name)
+                        arrS.push(arr)
+                    }
+                }
+            }
+            this.setState({
+                power_list:parentIds,
+                data:arrS,
+                checkedList:arrText,
+                power_children:powerChildren
+            })
+            this.props.updateCode()
+        }
         let rolesList;
+        // if(this.props.clickRolePower.length>0){
+        //     this.makeListData(this.props.clickRolePower)
+        // }
         const { getFieldDecorator } = this.props.form;
         if (this.props.powerListMenu.length > 0) {
             rolesList = this.props.powerListMenu.map((item,key) => {
@@ -262,26 +371,56 @@ export class LeftPowerInfo extends React.Component {
                         <span id={item.role_id}>
                             <table>
                                 <tr>
-                                    <td style={{ width: 160 }}><a onClick={this.showRoleInfo.bind(this, item.role_id, item.role_name)}>{item.role_name}</a></td>
+                                    <td style={{ width: 560 }}><a onClick={this.showRoleInfo.bind(this, item.role_id, item.role_name)}>{item.role_name}</a></td>
                                     <td>
-                                        <Button size='small' className='mainButton' style={{ marginBottom: 5, marginRight: 5 }} onClick={this.updateShowModal.bind(this, item.role_id)}>修改</Button>
-                                        <Button size='small' className='mainButton'>删除</Button>
+                                        <Button size='small' className='mainButton' style={{ marginBottom: 5, marginRight: 5 }} onClick={this.updateShowModal.bind(this, item.role_id,item.role_name,item.role_description)}>修改</Button>
+                                        <Button size='small' onClick={this.delShowModal.bind(this, item.role_id)} className='mainButton'>删除</Button>
                                     </td>
                                 </tr>
                             </table>
                         </span>
                         <Modal
                             visible={this.state.upateVisible}
-                            title="Title"
+                            width='780'
+                            footer={null}
                             onOk={this.handleOkUpdate.bind(this)}
                             onCancel={this.handleCancelUpdate.bind(this)}
                         >
+                            <Form layout="inline" onSubmit={this.handleSubmit.bind(this)}>
+                                <Row>
+                                    <Col span={11}>
+                                        <Card title='修改角色' id='addRoleCard'>
+                                            <FormItem label='角色名称' style={{ marginBottom: 5, marginRight: 5 }}>
+                                                    <Input placeholder={this.state.changeData!=null?this.state.changeData.role_name:""}  style={{ width: 228 }} />
+                                            </FormItem>
+                                            <FormItem label='角色描述'>
+                                                {getFieldDecorator('role_detail', {})
+                                                (
+                                                    <textarea placeholder={this.state.changeData!=null?this.state.changeData.parentName:""} rows="8" cols="35" className='addRoleTextarea' />
+                                                )}
+                                            </FormItem>
+                                        </Card>
+                                    </Col>
+                                    <Col span={1}></Col>
+                                    <Col span={12}>
+                                        <Card title='角色权限' id='addRoleCard' extra={<Button size='small' style={{ marginRight: 40 }} className='mainButton' onClick={this.addPower.bind(this)}>{this.state.data.length<1?"添加权限":"修改权限"}</Button>}>
+                                            <div className='addPowerContainer'>
+                                                <div className='power_name'>权限名称</div>
+                                                <Table rowSelection={rowSelection} columns={columns} dataSource={this.state.data} />
+                                            </div>
+                                        </Card>
+                                    </Col>
+                                </Row>
+                                <div style={{textAlign:"center"}}>
+                                    <Button onClick={this.offBtn.bind(this)} >取消</Button>
+                                    <Button htmlType="submit"  className="mainButton" style={{marginLeft:"20px"}}>确定</Button>
+                                </div>
+                            </Form>
                         </Modal>
                     </div>
                 );
             })
         }
-
         return (
             <div>
                 <Card title="角色名称"
@@ -292,6 +431,7 @@ export class LeftPowerInfo extends React.Component {
                 <Modal
                     visible={this.state.addRoleVisible}
                     width='780'
+                    footer={null}
                     onOk={this.handleOkAdd.bind(this)}
                     onCancel={this.handleCancelAdd.bind(this)}
                 >
@@ -303,7 +443,7 @@ export class LeftPowerInfo extends React.Component {
                                     <FormItem label='角色名称' style={{ marginBottom: 5, marginRight: 5 }}>
                                         {getFieldDecorator('role_name', {})
                                             (
-                                            <Input style={{ width: 228 }} />
+                                            <Input  style={{ width: 228 }} />
                                             )}
                                     </FormItem>
                                     <FormItem label='角色描述'>
@@ -317,14 +457,18 @@ export class LeftPowerInfo extends React.Component {
                             <Col span={1}></Col>
                             <Col span={12}>
                                 <Card title='角色权限' id='addRoleCard' extra={<Button size='small' style={{ marginRight: 40 }} className='mainButton'
-                                    onClick={this.addPower.bind(this)}>添加权限</Button>}>
+                                    onClick={this.addPower.bind(this)}>{this.state.data.length<1?"添加权限":"修改权限"}</Button>}>
                                     <div className='addPowerContainer'>
                                         <div className='power_name'>权限名称</div>
-                                        <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+                                        <Table rowSelection={rowSelection} columns={columns} dataSource={this.state.data} />
                                     </div>
                                 </Card>
                             </Col>
                         </Row>
+                        <div style={{textAlign:"center",marginTop:"20px"}}>
+                            <Button onClick={this.offBtn.bind(this)} >取消</Button>
+                            <Button htmlType="submit"  className="mainButton" style={{marginLeft:"20px"}}>确定</Button>
+                        </div>
                     </Form>
                 </Modal>
 
@@ -363,15 +507,7 @@ export class LeftPowerInfo extends React.Component {
                                 <div>{this.state.checkedList}</div>
                             </Card>
                         </Col>
-                        {/* <Col span={16}>
-                            <Transfer
-                                dataSource={this.state.mockData}
-                                
-                                targetKeys={this.state.targetKeys}
-                                onChange={this.handleChange.bind(this)}
-                                render={this.renderItem.bind(this)}
-                            />
-                        </Col> */}
+
                     </Row>
                 </Modal>
             </div>
@@ -380,8 +516,10 @@ export class LeftPowerInfo extends React.Component {
 }
 
 function mapStateToProps(state) {
-
+    console.log(state.getPowerList.clickPowerList)
     return {
+        //判断是否成功
+        code:state.getPowerList.code,
         //获取角色的列表值
         powerListMenu: state.getPowerList.powerList,
         //获取已有角色的权限列表值
@@ -390,6 +528,8 @@ function mapStateToProps(state) {
         powerClassification: state.getPowerList.powerClassification,
         //获取选中的权限信息
         clickedPower: state.getPowerList.clickPowerListInfo,
+        // 获取选择角色的权限信息
+        clickRolePower: state.getPowerList.clickPowerList,
     }
 }
 
@@ -405,6 +545,14 @@ function mapDispatchToProps(dispatch) {
         getPowerClassification: () => dispatch(actionCreator.getAllPowerClassification()),
         //获取选中的权限列表
         getClickPower: (id) => dispatch(actionCreator.getClickPowerList(id)),
+        //添加角色权限
+        postPowerList:(val) => dispatch(actionCreator.postPowerListInfo(val)),
+        //修改角色权限
+        putPowerList:(val) => dispatch(actionCreator.putPowerListInfo(val)),
+        // 删除角色
+        delPowerList: (val) => dispatch(actionCreator.delPowerListInfo(val)),
+        // 消除获取后数据bug
+        updateCode: () => dispatch(actionCreator.updateCodeInfo()),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(LeftPowerInfo))
