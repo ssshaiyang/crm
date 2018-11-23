@@ -1,0 +1,15 @@
+export default function salePlanListFilter(state, action) {
+	if (!state)
+		return null;
+	let newState = Object.assign({}, state);
+	switch (action.type) {
+		case 'SALE_PLAN_LIST_FILTER_SET_RANGE':
+			newState.startTime = action.payload.startTime;
+			newState.endTime = action.payload.endTime;
+			break;
+		case 'SALE_PLAN_LIST_FILTER_SET_FILTER':
+			newState.filter = action.payload.filter;
+			break;
+	}
+	return newState;
+}

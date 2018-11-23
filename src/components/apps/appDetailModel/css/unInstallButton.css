@@ -1,0 +1,30 @@
+/*
+* @Author: lcj
+* @Date:   2017-08-15 15:16:23
+* @Last Modified by:   lcj
+* @Last Modified time: 2017-08-15 15:33:48
+*/
+
+.ant-confirm-body .ant-confirm-content{
+	margin:30px 0 20px;
+	font-size:16px;
+}
+
+.ant-confirm .ant-confirm-btns{
+	float:none;
+	display: block;
+	text-align: center
+}
+
+.ant-confirm-btns .ant-btn{
+	background-color:#e2e2e2;
+	color:white;
+	border:none;
+}
+
+.ant-confirm-btns .ant-btn-primary{
+	background-color: #3ee1aa;
+	color:white;
+	margin-left:20px !important;
+	border:none;
+}

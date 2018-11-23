@@ -1,0 +1,3 @@
+--bail
+--require ./test/setup.js
+-t 10000

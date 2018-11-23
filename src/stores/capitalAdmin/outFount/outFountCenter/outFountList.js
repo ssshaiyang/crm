@@ -1,0 +1,20 @@
+export default {
+    condition:"-1",
+    data:[],
+    recordVisible:false,
+    detailVisible:false,
+    operationVisible:false,
+    filter:"",
+    totalCount:0,
+    page:1,
+    limit:5,
+    checkOut:[],
+    paymentCheckOut:[],
+    paymentTop:[],
+    paymentCenter:[],
+    relate_form_id:"",
+    relate_detail_id:"",
+    pay_manage_id:"",
+    pay_id:"",
+    accountList:[]
+}

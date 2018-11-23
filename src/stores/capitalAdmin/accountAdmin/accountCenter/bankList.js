@@ -1,0 +1,21 @@
+export default {
+    data:[],
+    limit:5,
+    page:1,
+    totalCount:0,
+    filter:'',
+    editVisible:false,
+    recordVisible:false,
+    modalType:0,
+    account_id:"",
+    api:'',
+    formData:{
+        account_user:"",
+        account_phone:"",
+        account_name:"",
+        bank_account:"",
+        account_usage:"",
+    },
+    record:[],
+    totalCountRecord:0
+}

@@ -1,0 +1,16 @@
+/*
+* @Author: lcj
+* @Date:   2017-08-14 14:19:42
+* @Last Modified by:   lcj
+* @Last Modified time: 2017-08-15 16:17:37
+*/
+
+.ant-upload-list-picture-card{
+	display:flex;
+}
+
+.ant-upload-list-picture-card .ant-upload-list-item{
+	width:400px;
+	height:400px;
+	margin:0 auto;
+}
